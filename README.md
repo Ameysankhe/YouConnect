@@ -21,7 +21,7 @@ The YouTube Middleware is designed to streamline the collaboration between YouTu
 
 1. **Clone the Repository:**
     ```bash
-    git clone https://github.com/your-username/your-repo-name.git
+    git clone https://github.com/Ameysankhe/YouTube-Middleware.git
     ```
 
 2. **Navigate to the Project Directory:**
