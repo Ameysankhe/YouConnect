@@ -2,9 +2,9 @@ import React from 'react';
 
 const YoutuberDashboard = () => {
 
-    const handleGrantAccess = () => {
-        window.location.href = 'http://localhost:4000/auth/youtube/login';
-    };
+    // const handleGrantAccess = () => {
+    //     window.location.href = 'http://localhost:4000/auth/youtube/login';
+    // };
 
     const handleLogout = async () => {
       try {
@@ -32,7 +32,8 @@ const YoutuberDashboard = () => {
   return (
     <div>
       <h1>Youtuber Dashboard</h1>
-      <button onClick={handleGrantAccess}>Grant Access</button><br></br><br></br>
+      {/* <button onClick={handleGrantAccess}>Grant Access</button><br></br><br></br> */}
+      <button>Create workspace</button><br></br><br></br>
       <button onClick={handleLogout}>Logout</button>
     </div>
   );

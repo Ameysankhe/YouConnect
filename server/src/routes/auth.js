@@ -78,6 +78,7 @@ router.post('/logout', (req, res) => {
   });
 });
 
+// 4)Handle the forgot-password route
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
 
@@ -165,33 +166,33 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // Youtube access route
-const SCOPES = ['https://www.googleapis.com/auth/youtube.upload'];
+// const SCOPES = ['https://www.googleapis.com/auth/youtube.upload'];
 
-let oauth2Tokens = {};
+// let oauth2Tokens = {};
 
-// Generate an OAuth URL and redirect to Google for authentication
-router.get('/youtube/login', (req, res) => {
-  const url = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: SCOPES,
-  });
-  res.redirect(url);
-});
+// // Generate an OAuth URL and redirect to Google for authentication
+// router.get('/youtube/login', (req, res) => {
+//   const url = oauth2Client.generateAuthUrl({
+//     access_type: 'offline',
+//     scope: SCOPES,
+//   });
+//   res.redirect(url);
+// });
 
-// Handle the OAuth callback
-router.get('/oauth2callback', async (req, res) => {
-  const { code } = req.query;
-  try {
-    const { tokens } = await oauth2Client.getToken(code);
-    oauth2Client.setCredentials(tokens);
-    // Store tokens securely in a real application
-    oauth2Tokens = tokens;
-    // res.json(tokens);
-    res.redirect('http://localhost:3000/youtuber/dashboard');
-  } catch (error) {
-    console.error('Error retrieving access token', error);
-    res.status(500).send('Authentication failed');
-  }
-});
+// // Handle the OAuth callback
+// router.get('/oauth2callback', async (req, res) => {
+//   const { code } = req.query;
+//   try {
+//     const { tokens } = await oauth2Client.getToken(code);
+//     oauth2Client.setCredentials(tokens);
+//     // Store tokens securely in a real application
+//     oauth2Tokens = tokens;
+//     // res.json(tokens);
+//     res.redirect('http://localhost:3000/youtuber/dashboard');
+//   } catch (error) {
+//     console.error('Error retrieving access token', error);
+//     res.status(500).send('Authentication failed');
+//   }
+// });
 
-export default router;
+// export default router;
