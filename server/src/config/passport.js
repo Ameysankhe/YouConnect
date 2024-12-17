@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import pool from './db.js';
 
 passport.use(new LocalStrategy({
-  usernameField: 'email', // Configure Passport to use `email` instead of `username`
+  usernameField: 'email', 
   passwordField: 'password'
 }, async (email, password, done) => {
   try {

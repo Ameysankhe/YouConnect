@@ -1,0 +1,22 @@
+.registration-form{
+    width: 420px;
+    color: white;
+    /* background-color: aqua; */
+}
+
+.registration-form h1{
+    font-size: 36px;
+    text-align: center;
+}
+
+.registration-form .input-box{
+    width: 100%;
+    height: 50px;
+    margin: 36px 0;
+}
+
+.input-box input{
+    width: 100%;
+    height: 100%;
+}
+

@@ -1,0 +1,17 @@
+*{
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+}
+
+/* body{
+    background-color: blueviolet;
+} */
+
+.container{
+    display: flex;
+    /* justify-content: center; */
+    /* align-items: center; */
+    justify-content: space-around;
+    min-height: 100vh;
+}
