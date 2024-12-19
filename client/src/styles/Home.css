@@ -8,10 +8,30 @@
     background-color: blueviolet;
 } */
 
-.container{
-    display: flex;
-    /* justify-content: center; */
-    /* align-items: center; */
-    justify-content: space-around;
-    min-height: 100vh;
+.container {
+    height: 200px;
+    position: relative;
 }
+  
+.center {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+.center button {
+    background-color: #008CBA;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+ 

@@ -12,9 +12,14 @@ const router = express.Router();
 
 // 1)Handle registration route
 router.post('/register', async (req, res) => {
-  const { username, email, password, role } = req.body;
+  const { username, email, password, confirmPassword, role } = req.body;
 
   try {
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
+    }
+
     // Check if the user already exists
     const emailResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (emailResult.rows.length > 0) {
@@ -166,33 +171,42 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // Youtube access route
-// const SCOPES = ['https://www.googleapis.com/auth/youtube.upload'];
+const SCOPES = ['https://www.googleapis.com/auth/youtube.upload'];
 
-// let oauth2Tokens = {};
+// Generate an OAuth URL and redirect to Google for authentication
+router.get('/youtube/login', (req, res) => {
+  const { workspaceId } = req.query;
+  if (!workspaceId) {
+    return res.status(400).send('Missing workspaceId');
+  }
+  const url = oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: SCOPES,
+    state: workspaceId,
+  });
+  res.redirect(url);
+});
 
-// // Generate an OAuth URL and redirect to Google for authentication
-// router.get('/youtube/login', (req, res) => {
-//   const url = oauth2Client.generateAuthUrl({
-//     access_type: 'offline',
-//     scope: SCOPES,
-//   });
-//   res.redirect(url);
-// });
+// Handle the OAuth callback
+router.get('/oauth2callback', async (req, res) => {
+  const { code, state } = req.query; // state contains the workspaceId
+  const workspaceId = state; // This is now the workspaceId passed in the state
+  console.log('OAuth2 callback received with workspaceId:', workspaceId);
+  try {
+      const { tokens } = await oauth2Client.getToken(code);
+      oauth2Client.setCredentials(tokens);
 
-// // Handle the OAuth callback
-// router.get('/oauth2callback', async (req, res) => {
-//   const { code } = req.query;
-//   try {
-//     const { tokens } = await oauth2Client.getToken(code);
-//     oauth2Client.setCredentials(tokens);
-//     // Store tokens securely in a real application
-//     oauth2Tokens = tokens;
-//     // res.json(tokens);
-//     res.redirect('http://localhost:3000/youtuber/dashboard');
-//   } catch (error) {
-//     console.error('Error retrieving access token', error);
-//     res.status(500).send('Authentication failed');
-//   }
-// });
+      // Save tokens to the database linked to the workspace
+      await pool.query(
+          'UPDATE workspaces SET oauth_token = $1, oauth_refresh_token = $2 WHERE id = $3',
+          [tokens.access_token, tokens.refresh_token, workspaceId]
+      );
 
-// export default router;
+      res.redirect(`http://localhost:3000/workspace/${workspaceId}`);
+  } catch (error) {
+      console.error('Error retrieving access token', error);
+      res.status(500).send('Authentication failed');
+  }
+});
+
+export default router;

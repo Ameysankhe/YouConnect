@@ -1,15 +1,21 @@
-import React from 'react'
-import LoginForm from './LoginForm'
-import RegistrationForm from './RegistrationForm'
-import '../styles/Home.css'
+import React from 'react';
+import { useNavigate } from 'react-router-dom'; 
+import '../styles/Home.css';
 
 const Home = () => {
-  return (
-    <div className='container'>
-      <RegistrationForm />
-      <LoginForm />
-    </div>
-  )
-}
+    const navigate = useNavigate(); 
 
-export default Home
+    const handleGetStarted = () => {
+        navigate('/getstarted'); 
+    };
+
+    return (
+        <div className='container'>
+            <div className='center'>
+                <button onClick={handleGetStarted}>Get Started</button>
+            </div>
+        </div>
+    );
+};
+
+export default Home;

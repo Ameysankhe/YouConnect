@@ -12,6 +12,7 @@ CREATE TABLE users (
 CREATE TABLE workspaces (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    description TEXT,
     owner_id INTEGER NOT NULL REFERENCES users(id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -39,16 +40,16 @@ CREATE TABLE videos (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE oauth_tokens (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    access_token TEXT,
-    refresh_token TEXT,
-    token_expires_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- CREATE TABLE oauth_tokens (
+--     id SERIAL PRIMARY KEY,
+--     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+--     access_token TEXT,
+--     refresh_token TEXT,
+--     token_expires_at TIMESTAMP,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
 
-There is also a session table
+-- There is also a session table
 
 

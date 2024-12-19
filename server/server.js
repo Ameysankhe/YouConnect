@@ -7,6 +7,8 @@ import pool from './src/config/db.js';
 import cors from 'cors';
 import passport from './src/config/passport.js'
 import authRoutes from './src/routes/auth.js';
+import workspaceRoutes from './src/routes/workspaces.js'; // Import workspace routes
+import workspaceDetailRoutes from './src/routes/workspaceDetails.js';
 import uploadRoutes from './src/routes/upload.js'; // Import upload routes
 
 dotenv.config();
@@ -61,6 +63,8 @@ app.use(passport.session());
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/workspaces', workspaceRoutes); 
+app.use('/workspace', workspaceDetailRoutes);
 app.use('/videos', uploadRoutes);
 
 
