@@ -18,14 +18,27 @@ CREATE TABLE workspaces (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE memberships (
+CREATE TABLE workspace_editors (
     id SERIAL PRIMARY KEY,
-    workspace_id INTEGER NOT NULL REFERENCES workspaces(id),
-    user_id INTEGER NOT NULL REFERENCES users(id),
-    role VARCHAR(50) NOT NULL,
+    workspace_id INTEGER NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+    editor_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status VARCHAR(50) NOT NULL DEFAULT 'Pending', -- Status: 'Pending', 'Accepted', 'Declined'
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE notifications (
+  id SERIAL PRIMARY KEY,
+  editor_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,  -- Editor receiving the notification
+  message TEXT NOT NULL,  -- Notification message
+  action_type VARCHAR(50),  -- Type of action (e.g., 'invite', 'approval')
+  status VARCHAR(20) DEFAULT 'pending',  -- Status of the notification
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Time of creation
+  expires_at TIMESTAMP,  -- Expiration time for the notification
+  workspace_editor_id INT NOT NULL REFERENCES workspace_editors(id) ON DELETE CASCADE,  -- Link to workspace_editors table
+  UNIQUE (editor_id, workspace_editor_id)  -- Prevent duplicate notifications for the same editor and invite
+);
+
 
 CREATE TABLE videos (
     id SERIAL PRIMARY KEY,
@@ -40,15 +53,15 @@ CREATE TABLE videos (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- CREATE TABLE oauth_tokens (
---     id SERIAL PRIMARY KEY,
---     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
---     access_token TEXT,
---     refresh_token TEXT,
---     token_expires_at TIMESTAMP,
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
--- );
+CREATE TABLE oauth_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    access_token TEXT,
+    refresh_token TEXT,
+    token_expires_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- There is also a session table
 

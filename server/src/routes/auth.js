@@ -202,7 +202,7 @@ router.get('/oauth2callback', async (req, res) => {
           [tokens.access_token, tokens.refresh_token, workspaceId]
       );
 
-      res.redirect(`http://localhost:3000/workspace/${workspaceId}`);
+      res.redirect(`http://localhost:3000/workspace/${workspaceId}?success=true`);
   } catch (error) {
       console.error('Error retrieving access token', error);
       res.status(500).send('Authentication failed');
