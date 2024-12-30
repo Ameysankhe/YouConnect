@@ -10,7 +10,7 @@ import authRoutes from './src/routes/auth.js';
 import workspaceRoutes from './src/routes/workspaces.js'; // Import workspace routes
 import workspaceDetailRoutes from './src/routes/workspaceDetails.js';
 import editorNotificationRoutes from './src/routes/editorNotifications.js';
-import uploadRoutes from './src/routes/upload.js'; // Import upload routes
+import { router as youtuberNotificationRoutes } from './src/routes/youtuberNotifications.js';
 
 dotenv.config();
 
@@ -67,7 +67,7 @@ app.use('/auth', authRoutes);
 app.use('/workspaces', workspaceRoutes); 
 app.use('/workspace', workspaceDetailRoutes);
 app.use('/editor', editorNotificationRoutes);
-app.use('/videos', uploadRoutes);
+app.use('/youtuber', youtuberNotificationRoutes);
 
 
 app.listen(PORT, () => {

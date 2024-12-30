@@ -4,27 +4,50 @@ import pool from '../config/db.js';
 
 const router = express.Router();
 
-// Route to fetch workspace details by ID
+// Route to fetch workspace details by ID and the user's role
 router.get('/:id', async (req, res) => {
     const workspaceId = req.params.id;
-    console.log('Workspace ID from params:', workspaceId);
-    try {
-        const query = `
-        SELECT id, name, description, created_at, oauth_token
-        FROM workspaces
-        WHERE id = $1`;
-        const result = await pool.query(query, [workspaceId]);
+    const userId = req.user.id; // Assuming user is authenticated and their ID is available here
 
-        if (result.rows.length === 0) {
+    try {
+        // Query to get workspace details
+        const workspaceQuery = `
+            SELECT id, name, description, created_at, oauth_token
+            FROM workspaces
+            WHERE id = $1
+        `;
+        const workspaceResult = await pool.query(workspaceQuery, [workspaceId]);
+
+        if (workspaceResult.rows.length === 0) {
             return res.status(404).json({ error: 'Workspace not found' });
         }
 
-        res.status(200).json(result.rows[0]);
+        // Query to get user role
+        const roleQuery = `
+            SELECT role
+            FROM users
+            WHERE id = $1
+        `;
+        const roleResult = await pool.query(roleQuery, [userId]);
+
+        if (roleResult.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const role = roleResult.rows[0].role; // Get user role from the result
+
+        // Send back the workspace details along with the user's role
+        res.status(200).json({
+            workspace: workspaceResult.rows[0], // Workspace details
+            userRole: role // User role
+        });
+
     } catch (error) {
         console.error('Error fetching workspace details:', error);
         res.status(500).json({ error: 'Internal server error.' });
     }
 });
+
 
 // Revoke access from Google
 const revokeGoogleAccess = async (oauthToken) => {
@@ -122,17 +145,26 @@ router.post('/:id/add-editor', async (req, res) => {
 
                 // Insert notification into the database
                 const notificationQuery = `
-                 INSERT INTO notifications (editor_id, message, action_type, status, workspace_editor_id)
-                 VALUES ($1, $2, $3, $4, $5)`;
-                await pool.query(notificationQuery, [editorId, message, actionType, status, workspaceEditorId]);
+                INSERT INTO notifications (
+                editor_id, message, action_type, status, workspace_editor_id, expires_at
+                )
+                VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP + INTERVAL '3 days')`;
+                await pool.query(notificationQuery, [
+                    editorId,
+                    message,
+                    actionType,
+                    status,
+                    workspaceEditorId
+                ]);
+
 
                 res.status(200).json({ message: 'Editor added and notification sent successfully' });
 
-            }  else {
+            } else {
                 res.status(500).json({ message: 'Failed to retrieve workspace name' });
             }
         }
-            else {
+        else {
             res.status(500).json({ message: 'Failed to add editor' });
         }
     } catch (error) {
@@ -160,9 +192,9 @@ router.get('/:id/editors', async (req, res) => {
             return res.status(200).json([]);
         }
 
-         // Send back the list of editors
-         res.status(200).json(result.rows);
-        
+        // Send back the list of editors
+        res.status(200).json(result.rows);
+
     } catch (err) {
         console.error('Error fetching editors:', err);
         res.status(500).json({ message: 'An error occurred while fetching editors.' });

@@ -21,6 +21,14 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
+// Helper function to check if the notification has expired (older than 3 days)
+const isNotificationExpired = (notificationDate) => {
+  const notificationTime = new Date(notificationDate).getTime();
+  const currentTime = new Date().getTime();
+  const expiryTime = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds
+  return (currentTime - notificationTime) > expiryTime;
+};
+
 const EditorDashboard = () => {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -32,8 +40,6 @@ const EditorDashboard = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [workspaces, setWorkspaces] = useState([]);
   const navigate = useNavigate();
-
-
 
   useEffect(() => {
     // Fetch notifications periodically
@@ -47,7 +53,9 @@ const EditorDashboard = () => {
         if (response.ok) {
           const data = await response.json();
           console.log("Fetched Notifications:", data);
-          setNotifications(data);
+           // Filter out notifications that are expired (older than 3 days)
+           const validNotifications = data.filter(notification => !isNotificationExpired(notification.created_at));
+          setNotifications(validNotifications);
         } else {
           console.error("Failed to fetch notifications");
         }
@@ -84,8 +92,6 @@ const EditorDashboard = () => {
   useEffect(() => {
     fetchWorkspaces(); // Fetch workspaces initially when the component mounts
   }, []);
-
-
 
   useEffect(() => {
     if (notifications.length > 0) {
@@ -165,8 +171,6 @@ const EditorDashboard = () => {
       });
     }
   };
-
-
 
   const handleLogout = async () => {
     try {
@@ -266,7 +270,6 @@ const EditorDashboard = () => {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               YouConnect
             </Typography>
-            {/* <IconButton color="inherit" onClick={handleNotificationClick}> */}
             <IconButton color="inherit" onClick={handleNotificationClick}>
               <Badge
                 badgeContent={notifications.filter((notif) => !notif.seen).length} // Number of unread notifications
@@ -303,7 +306,6 @@ const EditorDashboard = () => {
                         mb: 1,
                       }}
                     >
-                      {/* <Typography variant="body1">{notification.message}</Typography> */}
                       <Typography
                         variant="body1"
                         sx={{
@@ -350,18 +352,6 @@ const EditorDashboard = () => {
           </Toolbar>
         </AppBar>
         <Toolbar />
-        {/* <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "80vh",
-          }}
-        >
-          <Typography variant="h4" color="textSecondary">
-            No Work Assigned
-          </Typography>
-        </Box> */}
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 4 }}>
           {workspaces.length > 0 ? (
             workspaces.map((workspace) => (
@@ -378,21 +368,18 @@ const EditorDashboard = () => {
               >
                 <Typography variant="h6">{workspace.name}</Typography>
                 <Typography variant="body2" color="textSecondary">{workspace.description}</Typography>
-                <Button variant="contained" color="primary" sx={{ mt: 2 }}>
-                  Enter Workspace
-                </Button>
-                {/* <Button
+                <Button
                   variant="contained"
                   color="primary"
                   sx={{ mt: 2 }}
                   onClick={() => navigate(`/workspace/${workspace.id}`)} // Dynamic routing
                 >
                   Enter Workspace
-                </Button> */}
+                </Button>
               </Box>
             ))
           ) : (
-            <Typography variant="h6" color="textSecondary">No workspaces available</Typography>
+            <Typography variant="h6" color="textSecondary">No work assigned</Typography>
           )}
         </Box>
 

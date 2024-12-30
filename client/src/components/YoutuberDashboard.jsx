@@ -26,7 +26,6 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'; // Three dots icon
 const drawerWidth = 240;
 
 const YoutuberDashboard = () => {
-    // const [showForm, setShowForm] = useState(false);
     const [workspaceName, setWorkspaceName] = useState('');
     const [workspaceDescription, setWorkspaceDescription] = useState('');
     const [workspaces, setWorkspaces] = useState([]);
@@ -56,12 +55,10 @@ const YoutuberDashboard = () => {
             if (response.ok) {
                 setWorkspaces(data.workspaces);
             } else {
-                // alert('Failed to fetch workspaces');
                 showSnackbar('Failed to fetch workspaces', 'error');
             }
         } catch (error) {
             console.error('Error fetching workspaces:', error);
-            // alert('An error occurred while fetching workspaces.');
             showSnackbar('An error occurred while fetching workspaces.', 'error');
         }
     };
@@ -83,19 +80,16 @@ const YoutuberDashboard = () => {
 
             const data = await response.json();
             if (response.ok) {
-                // alert('Workspace created successfully!');
                 showSnackbar('Workspace created successfully!', 'success');
                 setOpenModal(false);
                 fetchWorkspaces();
                 setWorkspaceName('');
                 setWorkspaceDescription('');
             } else {
-                // alert(`Error: ${data.error}`);
                 showSnackbar(`Error: ${data.error}`, 'error');
             }
         } catch (error) {
             console.error('Error creating workspace:', error);
-            // alert('An error occurred during workspace creation.');
             showSnackbar('An error occurred during workspace creation.', 'error');
         }
     };
@@ -108,13 +102,11 @@ const YoutuberDashboard = () => {
                 credentials: 'include',
             });
             if (response.ok) {
-                // window.location.href = '/';
                 showSnackbar('Logged out successfully', 'success'); // Show success message
                 setTimeout(() => {
                     window.location.href = '/'; // Redirect after 0.5 seconds
                 }, 1000);
             } else {
-                // alert('Logout failed');
                 showSnackbar('Logout failed', 'error');
             }
         } catch (error) {
