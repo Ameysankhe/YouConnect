@@ -44,7 +44,7 @@ router.get('/:id', async (req, res) => {
 
     } catch (error) {
         console.error('Error fetching workspace details:', error);
-        res.status(500).json({ error: 'Internal server error.' });
+        res.status(500).json({ error: 'An error occurred while fetching workspace details.' });
     }
 });
 
@@ -100,7 +100,7 @@ router.post('/:id/revoke-access', async (req, res) => {
         }
     } catch (error) {
         console.error('Error revoking access:', error);
-        res.status(500).json({ message: 'Failed to revoke access' });
+        res.status(500).json({ message: 'Failed to revoke access.' });
     }
 });
 
@@ -169,7 +169,7 @@ router.post('/:id/add-editor', async (req, res) => {
         }
     } catch (error) {
         console.error('Error adding editor:', error);
-        res.status(500).json({ message: 'An error occurred' });
+        res.status(500).json({ message: 'An error occurred while adding an editor.' });
     }
 });
 
@@ -201,6 +201,40 @@ router.get('/:id/editors', async (req, res) => {
     }
 });
 
+// Route to get list of videos by workspace ID
+router.get('/:id/listofvideos', async (req, res) => {
+    const workspaceId = req.params.id;
+    try {
+        const query = `
+            SELECT id, title, description, status, thumbnail_url 
+            FROM videos 
+            WHERE workspace_id = $1
+        `;
+        const result = await pool.query(query, [workspaceId]);
+        return res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Error fetching videos:', error);
+        return res.status(500).json({ message: 'Failed to fetch video data.' });
+    }
+});
 
+// Route to fetch videos for approval
+router.get('/:id/approve-videos', async (req, res) => {
+    const workspaceId = req.params.id;
+  
+    try {
+      const result = await pool.query(
+        `SELECT id, title, description, thumbnail_url, video_url 
+         FROM videos 
+         WHERE workspace_id = $1 AND status = 'Pending'`,
+        [workspaceId]
+      );
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching videos:', error);
+      res.status(500).json({ error: 'Failed to fetch videos.' });
+    }
+  });
+  
 
 export default router;

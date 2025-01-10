@@ -15,10 +15,13 @@ router.post('/upload', upload.fields([{ name: 'video' }, { name: 'thumbnail' }])
         const videoFile = req.files['video'][0];
         const thumbnailFile = req.files['thumbnail'][0];
 
-        if (!videoFile || !thumbnailFile) {
-            return res.status(400).json({ message: 'Both video and thumbnail files are required.' });
+        // Validate required fields
+        if (!title || !description || !tags || !category || !default_language || !default_audio_language || !privacy_status || !videoFile || !thumbnailFile) {
+            return res.status(400).json({ message: 'All fields are required.' });
         }
 
+        const editor_id = req.user.id;
+       
         const videoId = Date.now(); // Unique ID for the video
         const bucket = storage.bucket('youconnect-9671a.firebasestorage.app');
 
@@ -36,11 +39,11 @@ router.post('/upload', upload.fields([{ name: 'video' }, { name: 'thumbnail' }])
 
         // Insert metadata into PostgreSQL
         const query = `
-            INSERT INTO videos (title, description, tags, category, default_language, default_audio_language, privacy_status, video_url, thumbnail_url, status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Pending')
+            INSERT INTO videos (title, description, tags, category, default_language, default_audio_language, privacy_status, video_url, thumbnail_url, status, workspace_id, editor_id)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Pending', $10, $11)
             RETURNING id
         `;
-        const values = [title, description, tags ? tags.split(',') : [], category, default_language, default_audio_language, privacy_status, videoUrl, thumbnailUrl];
+        const values = [title, description, tags ? tags.split(',') : [], category, default_language, default_audio_language, privacy_status, videoUrl, thumbnailUrl, workspace_id, editor_id];
         const result = await pool.query(query, values);
 
         return res.status(201).json({ message: 'Video uploaded successfully.', videoId: result.rows[0].id });

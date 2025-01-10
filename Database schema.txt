@@ -53,6 +53,24 @@ CREATE TABLE general_notifications (
   UNIQUE (recipient_id, notification_type, related_entity_id) -- Prevent duplicate notifications
 );
 
+CREATE TABLE videos (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  tags TEXT[],
+  category VARCHAR(100),
+  default_language VARCHAR(10),
+  default_audio_language VARCHAR(10),
+  privacy_status VARCHAR(50),
+  video_url VARCHAR(255), -- URL for the video stored in Firebase
+  thumbnail_url VARCHAR(255), -- URL for the thumbnail stored in Firebase
+  status VARCHAR(50) DEFAULT 'Pending', -- Video status (Pending/Approved/Rejected)
+  workspace_id INTEGER NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE, -- Reference to workspaces table with cascading delete
+  editor_id INTEGER NOT NULL REFERENCES users(id), -- Reference to the users table for editor's ID
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- There is also a session table
 
 

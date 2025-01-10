@@ -3,34 +3,90 @@ import { useParams } from 'react-router-dom';
 import { Box, Typography, TextField, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import axios from 'axios';
 
+const CustomProgressBar = ({ progress }) => (
+    <div style={{
+        position: 'relative',
+        width: '70%',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px'
+    }}>
+        <div style={{
+            flex: 1,
+            height: '4px',
+            backgroundColor: '#edf2f7',
+            borderRadius: '2px',
+            overflow: 'hidden'
+        }}>
+            <div style={{
+                width: `${progress}%`,
+                height: '100%',
+                backgroundColor: '#3b82f6',
+                transition: 'width 0.3s ease-in-out',
+                borderRadius: '2px'
+            }} />
+        </div>
+        <span style={{
+            fontSize: '14px',
+            color: '#64748b',
+            minWidth: '45px'
+        }}>
+            {progress}%
+        </span>
+    </div>
+);
+
 const UploadVideo = () => {
     const { id: workspace_id } = useParams();
     const [formData, setFormData] = useState({
-            title: '',
-            description: '',
-            tags: '',
-            category: '',
-            defaultLanguage: '',
-            defaultAudioLanguage: '',
-            privacyStatus: 'private',
+        title: '',
+        description: '',
+        tags: '',
+        category: '',
+        defaultLanguage: '',
+        defaultAudioLanguage: '',
+        privacyStatus: 'private',
     });
 
     const [videoFile, setVideoFile] = useState(null);
     const [thumbnailFile, setThumbnailFile] = useState(null);
+    const [videoProgress, setVideoProgress] = useState(0);
+    const [thumbnailProgress, setThumbnailProgress] = useState(0);
+    const [videoFileName, setVideoFileName] = useState('');
+    const [thumbnailFileName, setThumbnailFileName] = useState('');
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleFileChange = (e) => {
-        if (e.target.name === 'video') setVideoFile(e.target.files[0]);
-        if (e.target.name === 'thumbnail') setThumbnailFile(e.target.files[0]);
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (e.target.name === 'video') {
+            setVideoFile(file);
+            setVideoFileName(file.name);
+        }
+        if (e.target.name === 'thumbnail') {
+            setThumbnailFile(file);
+            setThumbnailFileName(file.name);
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!videoFile || !thumbnailFile) {
-            alert('Please upload both a video and a thumbnail.');
+
+        // Check for empty required fields
+        if (!formData.title.trim() ||
+            !formData.description.trim() ||
+            !formData.tags.trim() ||
+            !formData.category ||
+            !formData.defaultLanguage.trim() ||
+            !formData.defaultAudioLanguage.trim() ||
+            !videoFile ||
+            !thumbnailFile
+        ) {
+            alert('All fields are required. Please fill out all fields.');
             return;
         }
 
@@ -49,16 +105,48 @@ const UploadVideo = () => {
         try {
             const response = await axios.post('http://localhost:4000/api/upload', form, {
                 headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true,
+                onUploadProgress: (progressEvent) => {
+                    const totalLength = progressEvent.total;
+                    if (totalLength) {
+                        const progress = Math.round((progressEvent.loaded * 100) / totalLength);
+                        setVideoProgress(progress);
+                        setThumbnailProgress(progress);
+                    }
+                }
             });
             alert(response.data.message);
+            setVideoProgress(0);
+            setThumbnailProgress(0);
+            setFormData({
+                title: '',
+                description: '',
+                tags: '',
+                category: '',
+                defaultLanguage: '',
+                defaultAudioLanguage: '',
+                privacyStatus: 'private',
+            });
+            setVideoFile(null);
+            setThumbnailFile(null);
+            setVideoFileName('');
+            setThumbnailFileName('');
         } catch (error) {
             console.error('Error uploading video:', error);
             alert('Failed to upload video.');
         }
     };
 
+    // Custom styles for upload sections
+    const uploadSectionStyle = {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '20px',
+        marginBottom: '20px'
+    };
+
     return (
-        <Box component="form" onSubmit={handleSubmit}>
+        <Box component="form" onSubmit={handleSubmit} autoComplete="off">
             <Typography variant="h5">Upload a New Video</Typography>
             <Box sx={{ marginTop: 2 }}>
                 {/* Title */}
@@ -71,7 +159,7 @@ const UploadVideo = () => {
                     onChange={handleChange}
                     sx={{ marginBottom: 2 }}
                 />
-                
+
                 {/* Description */}
                 <TextField
                     name="description"
@@ -84,7 +172,7 @@ const UploadVideo = () => {
                     onChange={handleChange}
                     sx={{ marginBottom: 2 }}
                 />
-                
+
                 {/* Tags */}
                 <TextField
                     name="tags"
@@ -95,7 +183,7 @@ const UploadVideo = () => {
                     onChange={handleChange}
                     sx={{ marginBottom: 2 }}
                 />
-                
+
                 {/* Category */}
                 <FormControl fullWidth sx={{ marginBottom: 2 }}>
                     <InputLabel id="category-label">Category</InputLabel>
@@ -134,7 +222,7 @@ const UploadVideo = () => {
                     onChange={handleChange}
                     sx={{ marginBottom: 2 }}
                 />
-                
+
                 {/* Privacy Status */}
                 <FormControl fullWidth sx={{ marginBottom: 2 }}>
                     <InputLabel id="privacy-label">Privacy Status</InputLabel>
@@ -153,25 +241,46 @@ const UploadVideo = () => {
                 </FormControl>
 
                 {/* Video File */}
-                <Button
-                    variant="contained"
-                    component="label"
-                    sx={{ marginBottom: 2, marginRight: 2 }}
-                >
-                    Upload Video
-                    <input type="file" hidden name='video' onChange={handleFileChange}/>
-                </Button>
-                
+                <div style={uploadSectionStyle}>
+                    <Button
+                        variant="contained"
+                        component="label"
+                        sx={{ width: '200px' }}
+                    >
+                        Upload Video
+                        <input type="file" hidden name='video' onChange={handleFileChange} />
+                    </Button>
+                    {videoFileName && (
+                        <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2" gutterBottom>
+                                {videoFileName}
+                            </Typography>
+                            <CustomProgressBar progress={videoProgress} />
+                        </Box>
+                    )}
+                </div>
+
+
                 {/* Thumbnail File */}
-                <Button
-                    variant="contained"
-                    component="label"
-                    sx={{ marginBottom: 2 }}
-                >
-                    Upload Thumbnail
-                    <input type="file" hidden name='thumbnail' onChange={handleFileChange}/>
-                </Button>
-                
+                <div style={uploadSectionStyle}>
+                    <Button
+                        variant="contained"
+                        component="label"
+                        sx={{ width: '200px' }}
+                    >
+                        Upload Thumbnail
+                        <input type="file" hidden name='thumbnail' onChange={handleFileChange} />
+                    </Button>
+                    {thumbnailFileName && (
+                        <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2" gutterBottom>
+                                {thumbnailFileName}
+                            </Typography>
+                            <CustomProgressBar progress={thumbnailProgress} />
+                        </Box>
+                    )}
+                </div>
+
                 {/* Submit Button */}
                 <Button
                     type='submit'

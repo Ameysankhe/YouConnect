@@ -5,6 +5,7 @@ import { Notifications, ExitToApp, Lock, LockOpen, Add, CheckCircle, CloudUpload
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import UploadVideo from './UploadVideo';
 import ListVideos from './ListVideos';
+import ApproveVideos from './ApproveVideos';
 
 const drawerWidth = 240;
 
@@ -307,7 +308,7 @@ const WorkspacePage = () => {
                     </Box>
                 ) : null;
             case 'approveVideos':
-                return userRole === 'youtuber' ? (<Typography variant="h5">Approve videos here!</Typography>) : null;
+                return userRole === 'youtuber' ? (<ApproveVideos/>) : null;
 
             case 'uploadVideo':
                 return userRole !== 'youtuber' ? (<UploadVideo />) : null;

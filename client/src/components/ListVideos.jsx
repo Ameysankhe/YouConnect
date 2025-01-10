@@ -1,11 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Box, Typography, Card, CardContent, CardMedia, Button, Grid, IconButton } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import thumbnail1 from '../assets/thumbnail-1.jpg';
-import thumbnail2 from '../assets/thumbnail-2.jpg';
-import thumbnail3 from '../assets/thumbnail-3.jpg'
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import CancelIcon from '@mui/icons-material/Cancel';
+import axios from 'axios';
 
 const ListVideos = () => {
+    const { id } = useParams();
+    const [videosList, setVideosList] = useState([]);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        const fetchVideosList = async () => {
+            try {
+                const response = await axios.get(`http://localhost:4000/workspace/${id}/listofvideos`);
+                setVideosList(response.data);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching list of videos:', error);
+                setLoading(false);
+            }
+        };
+
+        fetchVideosList();
+    }, [id]);
+    if (loading) {
+        return <Typography>Loading list of videos...</Typography>;
+    }
+
+    if (videosList.length === 0) {
+        return <Typography>No videos found for this workspace.</Typography>;
+    }
+
     return (
         <Box>
             <Typography variant="h5" sx={{ marginBottom: 2 }}>
@@ -13,18 +40,14 @@ const ListVideos = () => {
             </Typography>
             <Grid container spacing={2}>
                 {/* Example static data */}
-                {[
-                    { title: 'Sample Title', description: 'Sample Description', status: 'Pending', thumbnail: thumbnail1 },
-                    { title: 'Another Title', description: 'Another Description', status: 'Approved', thumbnail: thumbnail2 },
-                    { title: 'Rejected Title', description: 'Rejected Description', status: 'Rejected', thumbnail: thumbnail3 },
-                ].map((video, index) => (
-                    <Grid item xs={12} sm={6} md={4} key={index}>
+                {videosList.map((video) => (
+                    <Grid item xs={12} sm={6} md={4} key={video.id}>
                         <Card>
                             <Box sx={{ position: 'relative' }}>
                                 <CardMedia
                                     component="img"
                                     height="150"
-                                    image={video.thumbnail}
+                                    image={video.thumbnail_url}
                                     alt={`${video.title} thumbnail`}
                                 />
                                 {video.status === 'Rejected' && (
@@ -41,19 +64,47 @@ const ListVideos = () => {
                                     </IconButton>
                                 )}
                             </Box>
-                            <CardContent>
+                            <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                                 <Typography variant="h6">{video.title}</Typography>
                                 <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 1 }}>
                                     {video.description}
                                 </Typography>
-                                <Typography
-                                    variant="body2"
-                                    sx={{
-                                        color: video.status === 'Rejected' ? 'error.main' : video.status === 'Approved' ? 'success.main' : 'textSecondary',
-                                    }}
-                                >
-                                    {video.status}
-                                </Typography>
+                                <div style={{ marginTop: 'auto', alignSelf: 'flex-end', display: 'flex', alignItems: 'center' }}>
+                                    {/* Conditional Rendering for Icons */}
+                                    {video.status === 'Pending' && (
+                                        <>
+                                            <AccessTimeIcon sx={{ color: 'orange', marginRight: 1 }} />
+                                            <Typography
+                                                variant="body2"
+                                                sx={{ color: 'orange' }}
+                                            >
+                                                {video.status}
+                                            </Typography>
+                                        </>
+                                    )}
+                                    {video.status === 'Approved' && (
+                                        <>
+                                            <VerifiedIcon sx={{ color: 'success.main', marginRight: 1 }} />
+                                            <Typography
+                                                variant="body2"
+                                                sx={{ color: 'success.main' }}
+                                            >
+                                                {video.status}
+                                            </Typography>
+                                        </>
+                                    )}
+                                    {video.status === 'Rejected' && (
+                                        <>
+                                            <CancelIcon sx={{ color: 'error.main', marginRight: 1 }} />
+                                            <Typography
+                                                variant="body2"
+                                                sx={{ color: 'error.main' }}
+                                            >
+                                                {video.status}
+                                            </Typography>
+                                        </>
+                                    )}
+                                </div>
                             </CardContent>
                         </Card>
                     </Grid>
