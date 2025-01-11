@@ -21,7 +21,12 @@ router.post('/upload', upload.fields([{ name: 'video' }, { name: 'thumbnail' }])
         }
 
         const editor_id = req.user.id;
-       
+
+        // Fetch editor's name
+        const editorQuery = 'SELECT username FROM users WHERE id = $1';
+        const editorResult = await pool.query(editorQuery, [editor_id]);
+        const editorName = editorResult.rows[0]?.username;
+
         const videoId = Date.now(); // Unique ID for the video
         const bucket = storage.bucket('youconnect-9671a.firebasestorage.app');
 
@@ -45,6 +50,34 @@ router.post('/upload', upload.fields([{ name: 'video' }, { name: 'thumbnail' }])
         `;
         const values = [title, description, tags ? tags.split(',') : [], category, default_language, default_audio_language, privacy_status, videoUrl, thumbnailUrl, workspace_id, editor_id];
         const result = await pool.query(query, values);
+        const uploadedVideoId = result.rows[0].id;
+
+        // Send notification to the YouTuber
+
+        // Fetch YouTuber (workspace owner) details
+        const youtuberQuery = `
+         SELECT u.id AS recipient_id, u.username AS recipient_name
+         FROM workspaces w
+         INNER JOIN users u ON w.owner_id = u.id
+         WHERE w.id = $1
+     `;
+        const youtuberResult = await pool.query(youtuberQuery, [workspace_id]);
+        const youtuber = youtuberResult.rows[0];
+
+        if (!youtuber) {
+            return res.status(404).json({ message: 'YouTuber not found for the specified workspace.' });
+        }
+
+        // Create notification message
+        const message = `A new video titled "${title}" has been uploaded by ${editorName} for review.`;
+
+        // Insert notification into PostgreSQL
+        const notificationQuery = `
+         INSERT INTO general_notifications (recipient_id, recipient_role, message, notification_type, related_workspace_id, related_entity_id, related_entity_type, expires_at)
+         VALUES ($1, 'youtuber', $2, 'video_review', $3, $4, 'video', CURRENT_TIMESTAMP + INTERVAL '3 days')
+     `;
+        const notificationValues = [youtuber.recipient_id, message, workspace_id, uploadedVideoId];
+        await pool.query(notificationQuery, notificationValues);
 
         return res.status(201).json({ message: 'Video uploaded successfully.', videoId: result.rows[0].id });
     } catch (error) {

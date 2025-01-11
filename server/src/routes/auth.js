@@ -170,6 +170,19 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+// To get user details
+router.get('/user-info', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({
+      username: req.user.username,
+      email: req.user.email,
+      role: req.user.role,
+    });
+  } else {
+    res.status(401).json({ error: 'Unauthorized' });
+  }
+});
+
 // Youtube access route
 const SCOPES = ['https://www.googleapis.com/auth/youtube.upload'];
 

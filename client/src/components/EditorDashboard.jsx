@@ -15,6 +15,7 @@ import {
   Snackbar,
   Alert,
   Badge,
+  Popover,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -39,7 +40,29 @@ const EditorDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [workspaces, setWorkspaces] = useState([]);
+  const [username, setUsername] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
+
+  // Fetch user info on component mount
+  useEffect(() => {
+    fetch('http://localhost:4000/auth/user-info', {
+      method: 'GET',
+      credentials: 'include'
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setUsername(data.username);
+      })
+      .catch((error) => {
+        console.error('Error fetching user info:', error);
+      });
+  }, []);
 
   useEffect(() => {
     // Fetch notifications periodically
@@ -53,8 +76,8 @@ const EditorDashboard = () => {
         if (response.ok) {
           const data = await response.json();
           console.log("Fetched Notifications:", data);
-           // Filter out notifications that are expired (older than 3 days)
-           const validNotifications = data.filter(notification => !isNotificationExpired(notification.created_at));
+          // Filter out notifications that are expired (older than 3 days)
+          const validNotifications = data.filter(notification => !isNotificationExpired(notification.created_at));
           setNotifications(validNotifications);
         } else {
           console.error("Failed to fetch notifications");
@@ -96,13 +119,13 @@ const EditorDashboard = () => {
   useEffect(() => {
     if (notifications.length > 0) {
       const latestNotification = notifications[0];
-      if (latestNotification && !latestNotification.seen) {
-        setSnackbar({
-          open: true,
-          message: `New notification: ${latestNotification.message}`,
-          severity: "info",
-        });
-      }
+      // if (latestNotification && !latestNotification.seen) {
+      //   setSnackbar({
+      //     open: true,
+      //     message: `New notification: ${latestNotification.message}`,
+      //     severity: "info",
+      //   });
+      // }
     }
   }, [notifications]);
 
@@ -217,6 +240,17 @@ const EditorDashboard = () => {
     setShowNotifications((prev) => !prev);
   };
 
+  const handleAccountClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'account-popover' : undefined;
+
   return (
     <Box sx={{ display: "flex" }}>
       {/* Sidebar */}
@@ -275,7 +309,7 @@ const EditorDashboard = () => {
                 badgeContent={notifications.filter((notif) => !notif.seen).length} // Number of unread notifications
                 color="error"
               >
-                  <NotificationsIcon />
+                <NotificationsIcon />
               </Badge>
             </IconButton>
             {showNotifications && (
@@ -346,12 +380,32 @@ const EditorDashboard = () => {
               </Box>
             )}
 
-            <IconButton color="inherit">
+            <IconButton color="inherit" onClick={handleAccountClick}>
               <AccountCircleIcon />
             </IconButton>
+            {/* Popover for showing username */}
+            <Popover
+              id={id}
+              open={open}
+              anchorEl={anchorEl}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+            >
+              <Box sx={{ p: 2 }}>
+                <Typography variant="subtitle1">Hello, {username}!</Typography>
+              </Box>
+            </Popover>
           </Toolbar>
         </AppBar>
         <Toolbar />
+
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 4 }}>
           {workspaces.length > 0 ? (
             workspaces.map((workspace) => (

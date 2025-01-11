@@ -18,9 +18,10 @@ import {
     Menu,
     MenuItem,
     Snackbar,
-    Alert
+    Alert,
+    Popover,
 } from '@mui/material';
-import { Home, AddCircle, Logout, Notifications, AccountCircle, Close } from '@mui/icons-material';
+import { AddCircle, Logout, Notifications, AccountCircle, Close } from '@mui/icons-material';
 import MoreVertIcon from '@mui/icons-material/MoreVert'; // Three dots icon
 
 const drawerWidth = 240;
@@ -30,7 +31,9 @@ const YoutuberDashboard = () => {
     const [workspaceDescription, setWorkspaceDescription] = useState('');
     const [workspaces, setWorkspaces] = useState([]);
     const [openModal, setOpenModal] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null); // State for the menu anchor element
+    const [username, setUsername] = useState('');
+    const [menuAnchorEl, setMenuAnchorEl] = useState(null); // For Menu anchor
+    const [popoverAnchorEl, setPopoverAnchorEl] = useState(null); // For Popover anchor
     const [selectedWorkspace, setSelectedWorkspace] = useState(null); // To store the workspace being selected
 
     // Snackbar state
@@ -44,6 +47,27 @@ const YoutuberDashboard = () => {
     const showSnackbar = (message, severity = 'info') => {
         setSnackbar({ open: true, message, severity });
     };
+
+    // Fetch user info on component mount
+    useEffect(() => {
+        fetch('http://localhost:4000/auth/user-info', {
+            method: 'GET',
+            credentials: 'include',
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                setUsername(data.username);
+            })
+            .catch((error) => {
+                console.error('Error fetching user info:', error);
+                showSnackbar('Failed to fetch user info', 'error');
+            });
+    }, []);
 
     // Fetch workspaces
     const fetchWorkspaces = async () => {
@@ -115,16 +139,24 @@ const YoutuberDashboard = () => {
         }
     };
 
-
     // Handle menu click (open/close)
     const handleMenuClick = (event, workspace) => {
-        setAnchorEl(event.currentTarget); // Open the menu
+        setMenuAnchorEl(event.currentTarget); // Open the menu
         setSelectedWorkspace(workspace); // Set the workspace for which the menu is opened
     };
 
     // Handle menu close
     const handleMenuClose = () => {
-        setAnchorEl(null); // Close the menu
+        setMenuAnchorEl(null); // Close the menu
+    };
+
+    // Handle AccountCircle icon click (Popover)
+    const handlePopoverOpen = (event) => {
+        setPopoverAnchorEl(event.currentTarget); // Open the popover
+    };
+
+    const handlePopoverClose = () => {
+        setPopoverAnchorEl(null); // Close the popover
     };
 
     // Handle delete action
@@ -160,11 +192,24 @@ const YoutuberDashboard = () => {
                     <IconButton color="inherit">
                         <Notifications />
                     </IconButton>
-                    <IconButton color="inherit">
+                    <IconButton color="inherit" onClick={handlePopoverOpen}>
                         <AccountCircle />
                     </IconButton>
                 </Toolbar>
             </AppBar>
+
+            {/* Popover for AccountCircle */}
+            <Popover
+                open={Boolean(popoverAnchorEl)}
+                anchorEl={popoverAnchorEl}
+                onClose={handlePopoverClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+                <Box p={2}>
+                    <Typography>Hello! {username}!</Typography>
+                </Box>
+            </Popover>
 
             {/* Drawer */}
             <Drawer
@@ -178,10 +223,6 @@ const YoutuberDashboard = () => {
                 <Toolbar />
                 <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <List>
-                        {/* <ListItem button>
-                            <ListItemIcon><Home /></ListItemIcon>
-                            <ListItemText primary="Home" />
-                        </ListItem> */}
                         <ListItem button onClick={() => setOpenModal(true)} >
                             <ListItemIcon><AddCircle /></ListItemIcon>
                             <ListItemText primary="Create Workspace" />
@@ -281,13 +322,15 @@ const YoutuberDashboard = () => {
                     </Button>
                 </Box>
             </Modal>
+
+            {/* Menu for workspace actions */}
             <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
+                anchorEl={menuAnchorEl}
+                open={Boolean(menuAnchorEl)}
                 onClose={handleMenuClose}
             >
                 {/* <MenuItem onClick={handleDeleteWorkspace}>Delete</MenuItem> */}
-                <MenuItem>Delete</MenuItem>
+                <MenuItem onClick={handleMenuClose}>Delete</MenuItem>
             </Menu>
 
             {/* Snackbar for notifications */}

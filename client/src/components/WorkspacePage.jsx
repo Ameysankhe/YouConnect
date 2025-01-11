@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemIcon, ListItemText, Button, Box, Snackbar, Alert, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Menu, MenuItem, Badge } from '@mui/material';
-import { Notifications, ExitToApp, Lock, LockOpen, Add, CheckCircle, CloudUpload, ListAlt } from '@mui/icons-material';
+import { ExitToApp, Lock, LockOpen, Add, CheckCircle, CloudUpload, ListAlt } from '@mui/icons-material';
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import UploadVideo from './UploadVideo';
 import ListVideos from './ListVideos';
@@ -116,13 +116,13 @@ const WorkspacePage = () => {
                     const latestNotification = validNotifications.find(
                         (notification) => new Date(notification.created_at).getTime() > parsedLastSeenTime
                     );
-                    if (latestNotification) {
-                        setSnackbar({
-                            open: true,
-                            message: `New notification: ${latestNotification.message}`,
-                            severity: "info",
-                        });
-                    }
+                    // if (latestNotification) {
+                    //     setSnackbar({
+                    //         open: true,
+                    //         message: `New notification: ${latestNotification.message}`,
+                    //         severity: "info",
+                    //     });
+                    // }
                     // Count unread notifications
                     const unread = validNotifications.filter(notification => new Date(notification.created_at).getTime() > parsedLastSeenTime).length;
                     setUnreadCount(unread);
@@ -342,8 +342,6 @@ const WorkspacePage = () => {
                         {workspace.name}
                     </Typography>
                     <IconButton color="inherit" onClick={handleNotificationClick}>
-                        {/* <Badge badgeContent={unreadCount} color="error">
-                         */}
                         <Badge
                             badgeContent={unreadCount > 0 ? unreadCount : null}
                             color="error"
