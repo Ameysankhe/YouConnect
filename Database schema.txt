@@ -73,4 +73,11 @@ CREATE TABLE videos (
 
 -- There is also a session table
 
+Storage structure for firebase:
+/videos
+  /workspace_id
+    /video_id
+      - video.mp4  (The video file)
+      - thumbnail.jpg  (The video thumbnail)
+
 
