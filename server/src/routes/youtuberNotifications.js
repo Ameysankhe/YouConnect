@@ -3,18 +3,18 @@ import pool from '../config/db.js';
 
 const router = express.Router();
 
-// Fetch notifications for YouTuber
+// Fetch notifications for YouTuber in workspace
 router.get('/notifications/:workspaceId', async (req, res) => {
     const { workspaceId } = req.params;
 
     try {
         const query = `
-    SELECT gn.id, gn.message, gn.created_at
-    FROM general_notifications gn
-    JOIN workspaces w ON w.id = gn.related_workspace_id
-    WHERE w.id = $1 AND w.owner_id = $2
-    ORDER BY gn.created_at DESC
-`;
+        SELECT gn.id, gn.message, gn.created_at
+        FROM general_notifications gn
+        JOIN workspaces w ON w.id = gn.related_workspace_id
+        WHERE w.id = $1 AND gn.recipient_role = 'youtuber' AND w.owner_id = $2
+        ORDER BY gn.created_at DESC
+    `;
         const result = await pool.query(query, [workspaceId, req.user.id]);
 
         res.status(200).json(result.rows);

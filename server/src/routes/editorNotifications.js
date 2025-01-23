@@ -21,7 +21,7 @@ const deleteExpiredNotifications = async () => {
 // Run the cleanup function every 24 hours (86400000 milliseconds)
 setInterval(deleteExpiredNotifications, 24 * 60 * 60 * 1000);
 
-// Route to fetch notifications for an editor
+// Route to fetch notifications for an editor on dashboard
 router.get('/notifications', async (req, res) => {
     console.log(req.user.id)
     const editorId = req.user.id; // Assuming req.user contains the logged-in editor's data
@@ -42,19 +42,24 @@ router.get('/notifications', async (req, res) => {
     }
 });
 
-// Fetch notifications for editor
+// Fetch notifications for editor in workspace
 router.get('/notifications/:workspaceId', async (req, res) => {
     const { workspaceId } = req.params;
 
     try {
-        const query = `
-        SELECT gn.id, gn.message, gn.created_at
-        FROM general_notifications gn
-        JOIN workspaces w ON w.id = gn.related_workspace_id
-        WHERE w.id = $1 AND w.owner_id = $2
-        ORDER BY gn.created_at DESC
-        `;
+         const query = `
+         SELECT gn.id, gn.message, gn.created_at
+         FROM general_notifications gn
+         JOIN workspaces w ON w.id = gn.related_workspace_id
+         JOIN workspace_editors we ON we.workspace_id = w.id
+         WHERE w.id = $1 
+           AND gn.recipient_role = 'editor' 
+           AND we.editor_id = $2
+           AND we.status = 'Accepted'
+         ORDER BY gn.created_at DESC
+         `;
         const result = await pool.query(query, [workspaceId, req.user.id]);
+        console.log('Result:', result.rows);
 
         res.status(200).json(result.rows);
     } catch (error) {

@@ -206,19 +206,24 @@ router.get('/oauth2callback', async (req, res) => {
   const workspaceId = state; // This is now the workspaceId passed in the state
   console.log('OAuth2 callback received with workspaceId:', workspaceId);
   try {
-      const { tokens } = await oauth2Client.getToken(code);
-      oauth2Client.setCredentials(tokens);
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+    const { expiry_date } = tokens;
+
+    // Calculate the expiration time
+    const expiresAt = expiry_date ? new Date(expiry_date).toISOString() : null;
 
       // Save tokens to the database linked to the workspace
       await pool.query(
-          'UPDATE workspaces SET oauth_token = $1, oauth_refresh_token = $2 WHERE id = $3',
-          [tokens.access_token, tokens.refresh_token, workspaceId]
-      );
+      'UPDATE workspaces SET oauth_token = $1, oauth_refresh_token = $2, expires_at = $3 WHERE id = $4',
+      [tokens.access_token, tokens.refresh_token, expiresAt, workspaceId]
+    );
 
-      res.redirect(`http://localhost:3000/workspace/${workspaceId}?success=true`);
+    res.redirect(`http://localhost:3000/workspace/${workspaceId}?success=true`);
   } catch (error) {
-      console.error('Error retrieving access token', error);
-      res.status(500).send('Authentication failed');
+    console.error('Error retrieving access token', error);
+    res.status(500).send('Authentication failed');
   }
 });
 

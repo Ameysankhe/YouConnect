@@ -30,7 +30,7 @@ const ListVideos = () => {
     }
 
     if (videosList.length === 0) {
-        return <Typography>No videos found for this workspace.</Typography>;
+        return <Typography>No videos uploaded yet.</Typography>;
     }
 
     return (

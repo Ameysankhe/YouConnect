@@ -15,7 +15,10 @@ CREATE TABLE workspaces (
     description TEXT,
     owner_id INTEGER NOT NULL REFERENCES users(id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    oauth_token TEXT,
+    oauth_refresh_token TEXT,
+    expires_at TIMESTAMP
 );
 
 CREATE TABLE workspace_editors (
@@ -44,7 +47,7 @@ CREATE TABLE general_notifications (
   recipient_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- User receiving the notification
   recipient_role VARCHAR(20) NOT NULL, -- Role of the recipient ('editor' or 'youtuber')
   message TEXT NOT NULL, -- Notification message
-  notification_type VARCHAR(50) NOT NULL, -- Type of notification (e.g., 'invite_response', 'video_upload', 'video_review', 'video_deletion')
+  notification_type VARCHAR(50) NOT NULL, -- Type of notification (e.g., 'invite_response', 'video_upload', 'video_review', 'review_reponse', 'video_deletion')
   related_workspace_id INT REFERENCES workspaces(id) ON DELETE CASCADE, -- Associated workspace (if applicable)
   related_entity_id INT, -- ID of the related entity (e.g., workspace_editor_id, video_id)
   related_entity_type VARCHAR(50), -- Type of related entity (e.g., 'workspace_editor', 'video')

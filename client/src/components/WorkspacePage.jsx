@@ -83,6 +83,11 @@ const WorkspacePage = () => {
         const searchParams = new URLSearchParams(location.search);
         if (searchParams.get('success') === 'true') {
             setSnackbar({ open: true, message: 'Access granted successfully!', severity: 'success' });
+            // Remove 'success=true' from the URL
+            searchParams.delete('success');
+            const newSearch = searchParams.toString();
+            const newUrl = newSearch ? `${location.pathname}?${newSearch}` : location.pathname;
+            window.history.replaceState(null, '', newUrl);
         }
     }, [id, location.search]);
 
@@ -308,7 +313,7 @@ const WorkspacePage = () => {
                     </Box>
                 ) : null;
             case 'approveVideos':
-                return userRole === 'youtuber' ? (<ApproveVideos/>) : null;
+                return userRole === 'youtuber' ? (<ApproveVideos />) : null;
 
             case 'uploadVideo':
                 return userRole !== 'youtuber' ? (<UploadVideo />) : null;

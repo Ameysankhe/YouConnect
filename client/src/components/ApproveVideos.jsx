@@ -25,18 +25,41 @@ const ApproveVideos = () => {
       fetchVideos();
     }, [id]);
 
-  const handleApprove = (id) => {
-    alert(`Video with ID ${id} approved.`);
-    setVideos(videos.filter((video) => video.id !== id));
+  const handleApprove = async (videoId) => {
+    try {
+      const response = await axios.post(`http://localhost:4000/api/approve-video`, {
+        videoId,
+        workspaceId: id, // Pass workspaceId explicitly
+      });
+      alert(response.data.message);
+      setVideos(videos.filter((video) => video.id !== videoId));
+    } catch (error) {
+      console.error('Error approving video:', error);
+      alert('Failed to approve video.');
+    }
   };
 
-  const handleReject = (id) => {
-    alert(`Video with ID ${id} rejected.`);
-    setVideos(videos.filter((video) => video.id !== id));
+  const handleReject = (videoId) => {
+    alert(`Video with ID ${videoId} rejected.`);
+    setVideos(videos.filter((video) => video.id !== videoId));
   };
 
-  const handlePlay = (id) => {
-    setPlayingVideoId(id);
+  // const handleReject = async (videoId) => {
+  //   try {
+  //       const response = await axios.post(`http://localhost:4000/api/reject-video`, {
+  //           videoId,
+  //           workspaceId: id, // Pass workspaceId from useParams
+  //       });
+  //       alert(response.data.message);
+  //       setVideos(videos.filter((video) => video.id !== videoId));
+  //   } catch (error) {
+  //       console.error('Error rejecting video:', error);
+  //       alert('Failed to reject video.');
+  //   }
+  // };
+
+  const handlePlay = (videoId) => {
+    setPlayingVideoId(videoId);
     setIsPopupOpen(true);
   };
 
@@ -44,6 +67,10 @@ const ApproveVideos = () => {
     setPlayingVideoId(null);
     setIsPopupOpen(false);
   };
+
+   if (videos.length === 0) {
+          return <Typography>No videos for review.</Typography>;
+    }
 
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', padding: '20px' }}>

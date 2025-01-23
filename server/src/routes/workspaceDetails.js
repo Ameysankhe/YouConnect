@@ -88,7 +88,7 @@ router.post('/:id/revoke-access', async (req, res) => {
             if (revokeSuccess) {
                 // Remove tokens from your database after successful revocation
                 await pool.query(
-                    'UPDATE workspaces SET oauth_token = NULL, oauth_refresh_token = NULL WHERE id = $1',
+                    'UPDATE workspaces SET oauth_token = NULL, oauth_refresh_token = NULL, expires_at = NULL WHERE id = $1',
                     [id]
                 );
                 return res.status(200).json({ message: 'Access revoked successfully' });
