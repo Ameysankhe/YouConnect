@@ -1,21 +1,23 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; 
 import '../styles/Home.css';
+import Navbar from './NavBar.jsx';
+import CardGrid from './CardGrid.jsx';
+import Footer from './Footer.jsx';
+import QuickTubeBanner from './QuickTubeBanner.jsx';
+import ServicesSection from './ServiceSection.jsx';
 
 const Home = () => {
-    const navigate = useNavigate(); 
-
-    const handleGetStarted = () => {
-        navigate('/getstarted'); 
-    };
-
     return (
-        <div className='container'>
-            <div className='center'>
-                <button onClick={handleGetStarted}>Get Started</button>
-            </div>
+        <div className="container">
+            <Navbar />
+            <QuickTubeBanner/>
+            <ServicesSection/>
+            <CardGrid />
+            <Footer /> 
         </div>
+
     );
 };
 
 export default Home;
+

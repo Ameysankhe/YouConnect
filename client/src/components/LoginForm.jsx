@@ -20,7 +20,6 @@ const LoginForm = () => {
                 console.error('Error checking authentication status:', error);
             }
         };
-
         checkAuthStatus();
     }, []);
 

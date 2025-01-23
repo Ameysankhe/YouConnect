@@ -1,0 +1,45 @@
+.services-section {
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  padding: 50px 20px;
+  font-family: "Arial", sans-serif;
+  margin-top: 50px;
+}
+
+.services-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.services-button {
+  background-color: #000;
+  border: 2px solid #fff;
+  border-radius: 20px;
+  color: #fff;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.services-button:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+.services-title {
+  font-size: 36px;
+  font-weight: bold;
+  margin: 20px 0;
+}
+
+.services-description {
+  font-size: 16px;
+  color: #ccc;
+  word-wrap: break-word;
+  text-align: center;
+  width: 500px;
+  /* margin-left: 150px; */
+}
