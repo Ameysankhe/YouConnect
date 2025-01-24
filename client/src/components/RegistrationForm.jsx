@@ -112,11 +112,11 @@ const RegistrationForm = () => {
                             required
                         />
                     </div>
-                    <select value={role} onChange={(e) => setRole(e.target.value)}>
+                    <select className='dropdown-menu-registration' value={role} onChange={(e) => setRole(e.target.value)}>
                         <option value="editor">Editor</option>
                         <option value="youtuber">Youtuber</option>
                     </select><br /><br />
-                    <button type="submit">Register</button>
+                    <button className='submit-button-registration' type="submit">Register</button>
                 </form>
             </div>
 

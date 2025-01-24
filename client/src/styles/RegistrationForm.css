@@ -45,7 +45,19 @@
     background-color: #222;
 }
 
-.submit-button {
+.dropdown-menu-registration{
+    width: 100%;
+    padding: 12px;
+    background-color: #333;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-button-registration {
     width: 100%;
     padding: 12px;
     background-color: #ffffff;
@@ -57,7 +69,10 @@
     transition: background-color 0.3s;
 }
 
-.submit-button:hover {
+.submit-button-registration:hover {
     background-color: #ffbb33;
 }
+
+
+
 

@@ -1,5 +1,5 @@
 .login-form {
-    width: 420px;
+   width: 420px;
    background-color: #1a1a1a;
    padding: 40px;
    color: white;
@@ -29,3 +29,20 @@
    border: 1px solid #ccc; /* Optional: Add a border for better visibility */
    border-radius: 5px; /* Optional: Slightly round the corners */
 }
+
+.submit-button-login {
+   width: 100%;
+   padding: 12px;
+   background-color: #ffffff;
+   border: none;
+   border-radius: 5px;
+   color: black;
+   font-size: 16px;
+   cursor: pointer;
+   transition: background-color 0.3s;
+}
+
+.submit-button-login:hover {
+   background-color: #ffbb33;
+}
+

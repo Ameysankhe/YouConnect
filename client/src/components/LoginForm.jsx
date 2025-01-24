@@ -73,7 +73,7 @@ const LoginForm = () => {
                         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder='password' name="password" required />
                     </div>
                     <Link to="/forgot-password">Forgot password</Link><br></br><br></br>
-                    <button type="submit">Login</button>
+                    <button className='submit-button-login' type="submit">Login</button>
                 </form>
             </div>
              {/* Snackbar for alerts */}
