@@ -5,7 +5,7 @@ import '../styles/GetStarted.css'
 
 const GetStarted = () => {
   return (
-    <div className='container'>
+    <div className='getstarted-container'>
       <RegistrationForm />
       <LoginForm />
     </div>

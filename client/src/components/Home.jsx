@@ -8,7 +8,7 @@ import ServicesSection from './ServiceSection.jsx';
 
 const Home = () => {
     return (
-        <div className="container">
+        <div className="home-container">
             <Navbar />
             <QuickTubeBanner/>
             <ServicesSection/>

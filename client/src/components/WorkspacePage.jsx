@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemIcon, ListItemText, Button, Box, Snackbar, Alert, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Menu, MenuItem, Badge } from '@mui/material';
+import { Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemIcon, ListItemText, Button, Box, Snackbar, Alert, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Menu, MenuItem, Badge, CircularProgress} from '@mui/material';
 import { ExitToApp, Lock, LockOpen, Add, CheckCircle, CloudUpload, ListAlt } from '@mui/icons-material';
-import NotificationsIcon from "@mui/icons-material/Notifications";
+import NotificationsIcon from "@mui/icons-material/Notifications";  
 import UploadVideo from './UploadVideo';
 import ListVideos from './ListVideos';
 import ApproveVideos from './ApproveVideos';
@@ -336,7 +336,11 @@ const WorkspacePage = () => {
     };
 
     if (!workspace) {
-        return <p>Loading...</p>;
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+              <CircularProgress />
+            </div>
+        );
     }
 
     return (

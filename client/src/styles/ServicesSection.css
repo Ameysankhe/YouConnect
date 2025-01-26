@@ -2,9 +2,9 @@
   background-color: #000;
   color: #fff;
   text-align: center;
-  padding: 50px 20px;
+  padding: 0 20px 50px 20px;
   font-family: "Arial", sans-serif;
-  margin-top: 50px;
+  /* margin-top: 50px; */
 }
 
 .services-content {

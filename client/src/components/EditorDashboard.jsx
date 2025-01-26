@@ -16,6 +16,7 @@ import {
   Alert,
   Badge,
   Popover,
+  CircularProgress,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -40,6 +41,7 @@ const EditorDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [workspaces, setWorkspaces] = useState([]);
+  const [loading, setLoading] = useState(true); 
   const [username, setUsername] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
@@ -104,6 +106,7 @@ const EditorDashboard = () => {
         const data = await response.json();
         console.log("Fetched Workspaces:", data);
         setWorkspaces(data);
+        setLoading(false);
       } else {
         console.error("Failed to fetch workspaces");
       }
@@ -407,7 +410,11 @@ const EditorDashboard = () => {
         <Toolbar />
 
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 4 }}>
-          {workspaces.length > 0 ? (
+        {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (workspaces.length > 0 ? (
             workspaces.map((workspace) => (
               <Box
                 key={workspace.id}
@@ -434,6 +441,7 @@ const EditorDashboard = () => {
             ))
           ) : (
             <Typography variant="h6" color="textSecondary">No work assigned</Typography>
+          )
           )}
         </Box>
 

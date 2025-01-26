@@ -1,6 +1,7 @@
 import React from 'react';
 import Card from './Card';
 import '../styles/CardGrid.css';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 
 const CardGrid = () => {
   const cardsData = [
@@ -20,7 +21,7 @@ const CardGrid = () => {
       description: 'Notify YouTubers for content approval via WhatsApp or Slack for a streamlined process, making the workflow more efficient.',
     },
     {
-      icon: 'https://icons8.com/icon/12814/positive-dynamic',
+      icon: <ManageAccountsIcon style={{ color: '#ffffff', fontSize: 36 }} />,
       title: 'Multi-Channel Management',
       description: 'Effortlessly manage multiple YouTube channels from a single unified platform, saving time and increasing efficiency.',
     },

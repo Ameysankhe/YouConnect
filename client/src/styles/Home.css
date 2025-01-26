@@ -9,12 +9,14 @@ body {
     font-family: Arial, sans-serif; /* Optional */
 }
 
-.container {
-    background-color: #000000;
-    min-height: 100vh; /* Prevent overflow issues */
+.home-container {
     display: flex;
-    flex-direction: column; /* Stack items vertically */
-    gap: 20px; /* Space between items */
+    flex-direction: column; 
+    justify-content: space-around;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #000000;
+    gap: 20px; 
     padding: 20px;
 }
 

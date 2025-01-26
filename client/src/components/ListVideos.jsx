@@ -5,12 +5,14 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import CancelIcon from '@mui/icons-material/Cancel';
+import CircularProgress from '@mui/material/CircularProgress';
 import axios from 'axios';
 
 const ListVideos = () => {
     const { id } = useParams();
     const [videosList, setVideosList] = useState([]);
     const [loading, setLoading] = useState(true);
+    
     useEffect(() => {
         const fetchVideosList = async () => {
             try {
@@ -25,8 +27,13 @@ const ListVideos = () => {
 
         fetchVideosList();
     }, [id]);
+
     if (loading) {
-        return <Typography>Loading list of videos...</Typography>;
+        return(
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+              <CircularProgress />
+        </div>
+        );
     }
 
     if (videosList.length === 0) {

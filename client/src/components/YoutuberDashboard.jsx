@@ -20,6 +20,7 @@ import {
     Snackbar,
     Alert,
     Popover,
+    CircularProgress,
 } from '@mui/material';
 import { AddCircle, Logout, Notifications, AccountCircle, Close } from '@mui/icons-material';
 import MoreVertIcon from '@mui/icons-material/MoreVert'; // Three dots icon
@@ -30,6 +31,7 @@ const YoutuberDashboard = () => {
     const [workspaceName, setWorkspaceName] = useState('');
     const [workspaceDescription, setWorkspaceDescription] = useState('');
     const [workspaces, setWorkspaces] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [openModal, setOpenModal] = useState(false);
     const [username, setUsername] = useState('');
     const [menuAnchorEl, setMenuAnchorEl] = useState(null); // For Menu anchor
@@ -78,6 +80,7 @@ const YoutuberDashboard = () => {
             const data = await response.json();
             if (response.ok) {
                 setWorkspaces(data.workspaces);
+                setLoading(false)
             } else {
                 showSnackbar('Failed to fetch workspaces', 'error');
             }
@@ -90,6 +93,7 @@ const YoutuberDashboard = () => {
     useEffect(() => {
         fetchWorkspaces();
     }, []);
+
 
     // Handle workspace creation
     const handleCreateWorkspace = async (e) => {
@@ -242,6 +246,12 @@ const YoutuberDashboard = () => {
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
                 <Toolbar />
                 {/* Show 'No Workspace' or Workspace Cards */}
+                {loading ? (
+                <Box textAlign="center" mt={5}>
+                    <CircularProgress />
+                </Box>
+                ) : (
+                <>
                 {workspaces.length === 0 ? (
                     <Box textAlign="center" mt={5}>
                         <Typography variant="h5">No Workspace Created</Typography>
@@ -275,6 +285,8 @@ const YoutuberDashboard = () => {
                         ))}
                     </Box>
                 )}
+                </>
+            )}
             </Box>
 
             {/* Floating Form (Modal) */}

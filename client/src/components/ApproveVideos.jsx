@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactPlayer from 'react-player';
-import { Card, CardContent, Typography, Button, CardActions, IconButton, Dialog, DialogContent} from '@mui/material';
+import { Card, CardContent, Typography, Button, CardActions, IconButton, Dialog, DialogContent, CircularProgress} from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
@@ -9,6 +9,7 @@ import axios from 'axios';
 const ApproveVideos = () => {
   const { id } = useParams();
   const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [playingVideoId, setPlayingVideoId] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
@@ -17,6 +18,7 @@ const ApproveVideos = () => {
         try {
           const response = await axios.get(`http://localhost:4000/workspace/${id}/approve-videos`);
           setVideos(response.data);  
+          setLoading(false);
         } catch (error) {
           console.error('Error fetching videos:', error);
         }
@@ -67,6 +69,14 @@ const ApproveVideos = () => {
     setPlayingVideoId(null);
     setIsPopupOpen(false);
   };
+
+  if (loading) {
+    return(
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <CircularProgress />
+    </div>
+    );
+}
 
    if (videos.length === 0) {
           return <Typography>No videos for review.</Typography>;

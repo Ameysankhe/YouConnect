@@ -4,21 +4,17 @@
     box-sizing: border-box;
  }
  
- .container {
+.getstarted-container {
   display: flex;
-  justify-content: space-around; /* Adjust space between forms */
-  align-items: center; /* Vertically align the forms */
-  min-height: 100vh; /* Full viewport height */
-  padding: 20px; /* Add padding to prevent forms from touching the edges */
-  gap: 20px; /* Space between the forms */
+  flex-direction: row;
+  justify-content: center;
+  gap: 50px;
+  align-items: center; 
+  min-height: 100vh; 
+  padding: 20px; 
+  background-color: #000000;
 }
 
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column; /* Stack forms vertically */
-    gap: 20px; /* Reduce gap between stacked forms */
-  }
-}
 
 
    
