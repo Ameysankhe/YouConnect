@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemIcon, ListItemText, Button, Box, Snackbar, Alert, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Menu, MenuItem, Badge, CircularProgress} from '@mui/material';
-import { ExitToApp, Lock, LockOpen, Add, CheckCircle, CloudUpload, ListAlt } from '@mui/icons-material';
+import { Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemIcon, ListItemText, Button, Box, Snackbar, Alert, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Menu, MenuItem, Badge, CircularProgress, Collapse} from '@mui/material';
+import { ExitToApp, Lock, LockOpen, Add, CheckCircle, CloudUpload, ListAlt, ExpandLess, ExpandMore } from '@mui/icons-material';
 import NotificationsIcon from "@mui/icons-material/Notifications";  
 import UploadVideo from './UploadVideo';
 import ListVideos from './ListVideos';
@@ -30,6 +30,7 @@ const WorkspacePage = () => {
     const [unreadCount, setUnreadCount] = useState(0); // Add unread count state
     const [notificationAnchor, setNotificationAnchor] = useState(null);
     const [lastSeenNotificationTime, setLastSeenNotificationTime] = useState(null); // Track last seen notification time
+    const [isApproveVideosOpen, setIsApproveVideosOpen] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
     useEffect(() => {
@@ -331,6 +332,12 @@ const WorkspacePage = () => {
                 return null;
 
             default:
+                if (activeSection.startsWith('approveVideos-')) {
+                    const editorId = activeSection.split('-')[1];
+                    return userRole === 'youtuber' ? (
+                        <ApproveVideos editorId={editorId} />
+                    ) : null;
+                }
                 return null;
         }
     };
@@ -407,18 +414,45 @@ const WorkspacePage = () => {
                                 </ListItem>
                                 <ListItem
                                     button
-                                    selected={activeSection === 'approveVideos'}
-                                    onClick={() => setActiveSection('approveVideos')}
-                                    sx={{
-                                        backgroundColor: activeSection === 'approveVideos' ? 'rgba(0, 0, 255, 0.1)' : 'transparent'
+                                    onClick={() => {
+                                        setIsApproveVideosOpen(!isApproveVideosOpen);
+                                       
                                     }}
                                 >
                                     <ListItemIcon>
                                         <CheckCircle />
                                     </ListItemIcon>
                                     <ListItemText primary="Approve Videos" />
+                                    {editors.length > 0 && (
+                                        <IconButton size="small">
+                                            {isApproveVideosOpen ? <ExpandLess /> : <ExpandMore />}
+                                        </IconButton>
+                                    )}
                                 </ListItem>
-                            </>
+                                <Collapse in={isApproveVideosOpen} timeout="auto" unmountOnExit>
+                                    <List component="div" disablePadding>
+                                        {editors.map((editor) => (
+                                            <ListItem
+                                                key={editor.id}
+                                                button
+                                                // sx={{ pl: 4 }}
+                                                sx={{
+                                                    pl: 4,
+                                                    backgroundColor: activeSection === `approveVideos-${editor.id}` ? 'rgba(0, 0, 255, 0.1)' : 'transparent',
+                                                }}
+                                                onClick={() => {
+                                                setActiveSection(`approveVideos-${editor.id}`);
+                                                setIsApproveVideosOpen(false);
+                                            }}
+                                    >
+                                        <ListItemText primary={editor.email} onClick={()=>{
+                                            setActiveSection('approveVideos');
+                                        }}/>
+                                    </ListItem>
+                                ))}
+                            </List>
+                            </Collapse>
+                        </>
                         )}
                         {userRole !== 'youtuber' && (
                             <>

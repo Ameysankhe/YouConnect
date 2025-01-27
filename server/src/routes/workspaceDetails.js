@@ -204,13 +204,14 @@ router.get('/:id/editors', async (req, res) => {
 // Route to get list of videos by workspace ID
 router.get('/:id/listofvideos', async (req, res) => {
     const workspaceId = req.params.id;
+    const editorId = req.user.id;
     try {
         const query = `
             SELECT id, title, description, status, thumbnail_url 
             FROM videos 
-            WHERE workspace_id = $1
+            WHERE workspace_id = $1 AND editor_id = $2
         `;
-        const result = await pool.query(query, [workspaceId]);
+        const result = await pool.query(query, [workspaceId, editorId]);
         return res.status(200).json(result.rows);
     } catch (error) {
         console.error('Error fetching videos:', error);
@@ -218,16 +219,17 @@ router.get('/:id/listofvideos', async (req, res) => {
     }
 });
 
-// Route to fetch videos for approval
+// // Route to fetch videos for approval
 router.get('/:id/approve-videos', async (req, res) => {
     const workspaceId = req.params.id;
+    const { editorId } = req.query;
   
     try {
       const result = await pool.query(
         `SELECT id, title, description, thumbnail_url, video_url 
          FROM videos 
-         WHERE workspace_id = $1 AND status = 'Pending'`,
-        [workspaceId]
+         WHERE workspace_id = $1 AND status = 'Pending' AND editor_id = $2`,
+        [workspaceId, editorId]
       );
       res.json(result.rows);
     } catch (error) {
@@ -235,6 +237,8 @@ router.get('/:id/approve-videos', async (req, res) => {
       res.status(500).json({ error: 'Failed to fetch videos.' });
     }
   });
+
   
 
 export default router;
+

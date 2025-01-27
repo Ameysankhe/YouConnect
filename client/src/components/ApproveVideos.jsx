@@ -6,7 +6,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 
-const ApproveVideos = () => {
+const ApproveVideos = ({editorId}) => {
   const { id } = useParams();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +16,7 @@ const ApproveVideos = () => {
   useEffect(() => {
       const fetchVideos = async () => {
         try {
-          const response = await axios.get(`http://localhost:4000/workspace/${id}/approve-videos`);
+          const response = await axios.get(`http://localhost:4000/workspace/${id}/approve-videos`,{  params: { editorId }});
           setVideos(response.data);  
           setLoading(false);
         } catch (error) {
@@ -25,13 +25,14 @@ const ApproveVideos = () => {
       };
   
       fetchVideos();
-    }, [id]);
+    }, [id, editorId]);
 
   const handleApprove = async (videoId) => {
     try {
       const response = await axios.post(`http://localhost:4000/api/approve-video`, {
         videoId,
         workspaceId: id, // Pass workspaceId explicitly
+        // editorId: editorId  Pass editorId when approving
       });
       alert(response.data.message);
       setVideos(videos.filter((video) => video.id !== videoId));
