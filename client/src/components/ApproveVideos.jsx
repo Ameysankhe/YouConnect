@@ -15,7 +15,7 @@ const ApproveVideos = ({ editorId }) => {
     return description.length > 50
       ? description.substring(0, 50) + '.....'
       : description;
-    };
+  };
   // Add a key to reset the component when editorId changes
   const componentKey = `approve-videos-${editorId}`;
 
@@ -68,7 +68,7 @@ const ApproveVideos = ({ editorId }) => {
         >
           Back to Video List
         </Button>
-        <VideoReview video={selectedVideo}  onBackToList={handleBackToList} />
+        <VideoReview video={selectedVideo} onBackToList={handleBackToList} />
       </div>
     );
   }
@@ -76,21 +76,28 @@ const ApproveVideos = ({ editorId }) => {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', padding: '20px' }}>
       {videos.map((video) => (
-        <Card key={video.id} style={{ width: '300px' }}>
+        <Card
+          key={video.id}
+          style={{
+            width: '300px',
+            display: 'flex',
+            flexDirection: 'column',
+            height: 'auto ', 
+          }}>
           <div style={{ position: 'relative' }}>
             <img
               src={video.thumbnail_url}
               alt={video.title}
-              style={{ width: '100%', height: '150px', objectFit: 'cover' }}
+              style={{ width: '100%', height: '200px', objectFit: 'cover' }}
             />
           </div>
-          <CardContent>
+          <CardContent style={{ flex: '1 0 auto' }}>
             <Typography variant="h6">{video.title}</Typography>
             <Typography variant="body2" color="textSecondary">
               {truncateDescription(video.description)}
             </Typography>
           </CardContent>
-          <CardActions>
+          <CardActions style={{ padding: '16px', marginTop: 'auto' }}>
             <Button variant="contained" color="primary" onClick={() => handleReview(video)}>Review</Button>
           </CardActions>
         </Card>

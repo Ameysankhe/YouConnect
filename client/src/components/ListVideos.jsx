@@ -14,11 +14,11 @@ const ListVideos = () => {
     const [loading, setLoading] = useState(true);
     // Function to truncate description
     const truncateDescription = (description) => {
-        return description.length > 50 
-            ? description.substring(0, 50) + '.....' 
+        return description.length > 50
+            ? description.substring(0, 50) + '.....'
             : description;
     };
-    
+
     useEffect(() => {
         const fetchVideosList = async () => {
             try {
@@ -35,10 +35,10 @@ const ListVideos = () => {
     }, [id]);
 
     if (loading) {
-        return(
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-              <CircularProgress />
-        </div>
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <CircularProgress />
+            </div>
         );
     }
 
@@ -52,16 +52,30 @@ const ListVideos = () => {
                 Video Collection
             </Typography>
             <Grid container spacing={2}>
-                {/* Example static data */}
                 {videosList.map((video) => (
                     <Grid item xs={12} sm={6} md={4} key={video.id}>
-                        <Card>
-                            <Box sx={{ position: 'relative' }}>
+                        <Card sx={{
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            position: 'relative'
+                        }}>
+                            <Box sx={{
+                                position: 'relative', paddingTop: '56.25%',
+                                width: '100%'
+                            }}>
                                 <CardMedia
                                     component="img"
-                                    height="150"
                                     image={video.thumbnail_url}
                                     alt={`${video.title} thumbnail`}
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover'
+                                    }}
                                 />
                                 {video.status === 'Rejected' && (
                                     <IconButton
@@ -77,20 +91,21 @@ const ListVideos = () => {
                                     </IconButton>
                                 )}
                             </Box>
-                            <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                            <CardContent sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
                                 <Typography variant="h6">{video.title}</Typography>
                                 <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 1 }}>
                                     {truncateDescription(video.description)}
                                 </Typography>
-                                <div style={{ marginTop: 'auto', alignSelf: 'flex-end', display: 'flex', alignItems: 'center' }}>
-                                    {/* Conditional Rendering for Icons */}
+                                <Box sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    marginTop: 'auto' ,
+                                    alignSelf: 'flex-end'
+                                }}>
                                     {video.status === 'Pending' && (
                                         <>
                                             <AccessTimeIcon sx={{ color: 'orange', marginRight: 1 }} />
-                                            <Typography
-                                                variant="body2"
-                                                sx={{ color: 'orange' }}
-                                            >
+                                            <Typography variant="body2" sx={{ color: 'orange' }}>
                                                 {video.status}
                                             </Typography>
                                         </>
@@ -98,10 +113,7 @@ const ListVideos = () => {
                                     {video.status === 'Approved' && (
                                         <>
                                             <VerifiedIcon sx={{ color: 'success.main', marginRight: 1 }} />
-                                            <Typography
-                                                variant="body2"
-                                                sx={{ color: 'success.main' }}
-                                            >
+                                            <Typography variant="body2" sx={{ color: 'success.main' }}>
                                                 {video.status}
                                             </Typography>
                                         </>
@@ -109,15 +121,12 @@ const ListVideos = () => {
                                     {video.status === 'Rejected' && (
                                         <>
                                             <CancelIcon sx={{ color: 'error.main', marginRight: 1 }} />
-                                            <Typography
-                                                variant="body2"
-                                                sx={{ color: 'error.main' }}
-                                            >
+                                            <Typography variant="body2" sx={{ color: 'error.main' }}>
                                                 {video.status}
                                             </Typography>
                                         </>
                                     )}
-                                </div>
+                                </Box>
                             </CardContent>
                         </Card>
                     </Grid>
