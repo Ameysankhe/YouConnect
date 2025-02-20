@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemIcon, ListItemText, Button, Box, Snackbar, Alert, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Menu, MenuItem, Badge, CircularProgress, Collapse} from '@mui/material';
-import { ExitToApp, Lock, LockOpen, Add, CheckCircle, CloudUpload, ListAlt, ExpandLess, ExpandMore } from '@mui/icons-material';
-import NotificationsIcon from "@mui/icons-material/Notifications";  
+import { Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemIcon, ListItemText, Button, Box, Snackbar, Alert, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Menu, MenuItem, Badge, CircularProgress, Collapse } from '@mui/material';
+import { ExitToApp, Lock, LockOpen, Add, CheckCircle, CloudUpload, ListAlt, ExpandLess, ExpandMore, Menu as MenuIcon } from '@mui/icons-material';
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import UploadVideo from './UploadVideo';
 import ListVideos from './ListVideos';
 import ApproveVideos from './ApproveVideos';
@@ -32,8 +32,10 @@ const WorkspacePage = () => {
     const [lastSeenNotificationTime, setLastSeenNotificationTime] = useState(null); // Track last seen notification time
     const [isApproveVideosOpen, setIsApproveVideosOpen] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+    const [drawerOpen, setDrawerOpen] = useState(true);
 
     useEffect(() => {
+
         console.log('Workspace ID from URL:', id);
         const fetchWorkspaceDetails = async () => {
             try {
@@ -90,17 +92,21 @@ const WorkspacePage = () => {
             const newUrl = newSearch ? `${location.pathname}?${newSearch}` : location.pathname;
             window.history.replaceState(null, '', newUrl);
         }
+
     }, [id, location.search]);
 
     useEffect(() => {
+
         if (userRole === 'youtuber') {
             setActiveSection('grantAccess');
         } else if (userRole) {
             setActiveSection('uploadVideo');
         }
+
     }, [userRole]);
 
     useEffect(() => {
+
         const fetchNotifications = async () => {
             try {
                 const endpoint = userRole === 'youtuber'
@@ -146,6 +152,7 @@ const WorkspacePage = () => {
 
             return () => clearInterval(intervalId); // Cleanup on component unmount
         }
+
     }, [userRole, id]);
 
     const handleNotificationClick = (event) => {
@@ -263,7 +270,6 @@ const WorkspacePage = () => {
                     </Box>
                 ) : null;
             case 'addEditor':
-                // return <Typography variant="h5">Add editors here!</Typography>;
                 return userRole === 'youtuber' ? (
                     <Box>
                         <Typography variant="h5">Add an Editor to {workspace.name}</Typography>
@@ -345,15 +351,24 @@ const WorkspacePage = () => {
     if (!workspace) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-              <CircularProgress />
+                <CircularProgress />
             </div>
         );
     }
 
     return (
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{ display: 'flex', minHeight: '100vh' }}>
             <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
                 <Toolbar>
+                    <IconButton
+                        color="inherit"
+                        aria-label="toggle drawer"
+                        edge="start"
+                        onClick={() => setDrawerOpen(!drawerOpen)}
+                        sx={{ mr: 2 }}
+                    >
+                        <MenuIcon />
+                    </IconButton>
                     <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
                         {workspace.name}
                     </Typography>
@@ -375,13 +390,19 @@ const WorkspacePage = () => {
                     width: drawerWidth,
                     flexShrink: 0,
                     '& .MuiDrawer-paper': {
-                        width: drawerWidth,
                         boxSizing: 'border-box',
+                        position: 'fixed',
+                        height: '100vh',
+                        transition: 'width 0.2s',
+                        whiteSpace: 'nowrap',
+                        width: drawerOpen ? drawerWidth : 0,
+                        overflowX: 'hidden'
                     },
                 }}
+                open={drawerOpen}
             >
                 <Toolbar />
-                <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', }}>
                     <List>
                         {userRole === 'youtuber' && (
                             <>
@@ -416,43 +437,52 @@ const WorkspacePage = () => {
                                     button
                                     onClick={() => {
                                         setIsApproveVideosOpen(!isApproveVideosOpen);
-                                       
+
                                     }}
                                 >
                                     <ListItemIcon>
                                         <CheckCircle />
                                     </ListItemIcon>
                                     <ListItemText primary="Approve Videos" />
-                                    {editors.length > 0 && (
-                                        <IconButton size="small">
-                                            {isApproveVideosOpen ? <ExpandLess /> : <ExpandMore />}
-                                        </IconButton>
-                                    )}
+
+                                    <IconButton size="small">
+                                        {isApproveVideosOpen ? <ExpandLess /> : <ExpandMore />}
+                                    </IconButton>
+
                                 </ListItem>
                                 <Collapse in={isApproveVideosOpen} timeout="auto" unmountOnExit>
                                     <List component="div" disablePadding>
-                                        {editors.map((editor) => (
-                                            <ListItem
-                                                key={editor.id}
-                                                button
-                                                // sx={{ pl: 4 }}
-                                                sx={{
-                                                    pl: 4,
-                                                    backgroundColor: activeSection === `approveVideos-${editor.id}` ? 'rgba(0, 0, 255, 0.1)' : 'transparent',
-                                                }}
-                                                onClick={() => {
-                                                setActiveSection(`approveVideos-${editor.id}`);
-                                                setIsApproveVideosOpen(false);
-                                            }}
-                                    >
-                                        <ListItemText primary={editor.email} onClick={()=>{
-                                            setActiveSection('approveVideos');
-                                        }}/>
-                                    </ListItem>
-                                ))}
-                            </List>
-                            </Collapse>
-                        </>
+                                        {editors.length > 0 ? (
+                                            editors.map((editor) => (
+                                                <ListItem
+                                                    key={editor.id}
+                                                    button
+                                                    sx={{
+                                                        pl: 4,
+                                                        backgroundColor: activeSection === `approveVideos-${editor.id}` ? 'rgba(0, 0, 255, 0.1)' : 'transparent',
+                                                    }}
+                                                    onClick={() => {
+                                                        setActiveSection(`approveVideos-${editor.id}`);
+                                                    }}
+                                                >
+                                                    <ListItemText primary={editor.email} onClick={() => {
+                                                        setActiveSection('approveVideos');
+                                                    }} />
+                                                </ListItem>
+                                            ))
+                                        ) : (
+                                            <ListItem sx={{ pl: 4 }}>
+                                                <ListItemText
+                                                    primary="No editors present"
+                                                    sx={{
+                                                        color: 'text.secondary',
+                                                    }}
+                                                />
+                                            </ListItem>
+                                        )}
+                                    </List>
+                                </Collapse>
+                            </>
                         )}
                         {userRole !== 'youtuber' && (
                             <>
@@ -507,6 +537,8 @@ const WorkspacePage = () => {
                     bgcolor: 'background.default',
                     p: 3,
                     marginTop: 8,
+                    transition: 'margin-left 0.2s',
+                    marginLeft: drawerOpen ? 0 : `-${drawerWidth}px`,
                 }}
             >
                 {renderContent()}

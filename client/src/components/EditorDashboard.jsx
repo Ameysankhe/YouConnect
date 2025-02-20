@@ -22,6 +22,9 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import MenuIcon from "@mui/icons-material/Menu";
+
+const drawerWidth = 240;
 
 // Helper function to check if the notification has expired (older than 3 days)
 const isNotificationExpired = (notificationDate) => {
@@ -32,7 +35,7 @@ const isNotificationExpired = (notificationDate) => {
 };
 
 const EditorDashboard = () => {
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(true);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -41,13 +44,14 @@ const EditorDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [workspaces, setWorkspaces] = useState([]);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
 
   // Fetch user info on component mount
   useEffect(() => {
+
     fetch('http://localhost:4000/auth/user-info', {
       method: 'GET',
       credentials: 'include'
@@ -64,6 +68,7 @@ const EditorDashboard = () => {
       .catch((error) => {
         console.error('Error fetching user info:', error);
       });
+      
   }, []);
 
   useEffect(() => {
@@ -256,161 +261,184 @@ const EditorDashboard = () => {
 
   return (
     <Box sx={{ display: "flex" }}>
-      {/* Sidebar */}
-      <Drawer
-        variant="permanent"
-        open={drawerOpen}
+      <AppBar
+        position="fixed"
         sx={{
-          width: 240,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            width: 240,
-            boxSizing: "border-box",
-          },
+          zIndex: (theme) => theme.zIndex.drawer + 1
         }}
       >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="toggle drawer"
+            edge="start"
+            onClick={() => setDrawerOpen(!drawerOpen)}
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            YouConnect
+          </Typography>
+          <IconButton color="inherit" onClick={handleNotificationClick}>
+            <Badge
+              badgeContent={notifications.filter((notif) => !notif.seen).length}
+              color="error"
+            >
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
+          <IconButton color="inherit" onClick={handleAccountClick}>
+            <AccountCircleIcon />
+          </IconButton>
+          <Popover
+            id={id}
+            open={open}
+            anchorEl={anchorEl}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+          >
+            <Box sx={{ p: 2 }}>
+              <Typography variant="subtitle1">Hello, {username}!</Typography>
+            </Box>
+          </Popover>
+        </Toolbar>
+      </AppBar>
+
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            position: 'fixed',
+            height: '100vh',
+            transition: 'width 0.2s',
+            whiteSpace: 'nowrap',
+            width: drawerOpen ? drawerWidth : 0,
+            overflowX: 'hidden'
+          },
+        }}
+        open={drawerOpen}
+      >
         <Toolbar />
-        <List>
-          <ListItem button>
-            <ListItemIcon>
-              <DashboardIcon />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItem>
-        </List>
-        <Box sx={{ flexGrow: 1 }} />
-        <List>
-          <ListItem button onClick={handleLogout}>
-            <ListItemIcon>
-              <LogoutIcon />
-            </ListItemIcon>
-            <ListItemText primary="Logout" />
-          </ListItem>
-        </List>
+        <Box sx={{
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          height: 'calc(100vh - 64px)'
+        }}>
+          <List>
+            <ListItem button>
+              <ListItemIcon>
+                <DashboardIcon />
+              </ListItemIcon>
+              <ListItemText primary="Dashboard" />
+            </ListItem>
+          </List>
+          <Box sx={{ flexGrow: 1 }} />
+          <List>
+            <ListItem button onClick={handleLogout}>
+              <ListItemIcon>
+                <LogoutIcon />
+              </ListItemIcon>
+              <ListItemText primary="Logout" />
+            </ListItem>
+          </List>
+        </Box>
       </Drawer>
 
-      {/* Main Content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          bgcolor: "background.default",
+          bgcolor: 'background.default',
           p: 3,
+          marginTop: 8,
+          transition: 'margin-left 0.2s',
+          marginLeft: drawerOpen ? 0 : `-${drawerWidth}px`,
         }}
       >
-        {/* Top Bar */}
-        <AppBar
-          position="fixed"
-          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        >
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              YouConnect
-            </Typography>
-            <IconButton color="inherit" onClick={handleNotificationClick}>
-              <Badge
-                badgeContent={notifications.filter((notif) => !notif.seen).length} // Number of unread notifications
-                color="error"
-              >
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            {showNotifications && (
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: "50px",
-                  right: "10px",
-                  width: "300px",
-                  bgcolor: "background.paper",
-                  boxShadow: 3,
-                  borderRadius: 1,
-                  zIndex: 1201,
-                  p: 2,
-                }}
-              >
-                <Typography variant="h6" sx={{
-                  color: "black", // Ensure text is visible
-                  backgroundColor: "white", // Contrast background
-                }}>Notifications</Typography>
-                {notifications.length > 0 ? (
-                  notifications.map((notification) => (
-                    <Box
-                      key={notification.id}
-                      sx={{
-                        borderBottom: "1px solid #ddd",
-                        pb: 1,
-                        mb: 1,
-                      }}
-                    >
-                      <Typography
-                        variant="body1"
-                        sx={{
-                          color: "black", // Ensure text is visible
-                          backgroundColor: "white", // Contrast background
-                        }}
-                      >
-                        {notification.message || "No message available"}
-                      </Typography>
-                      <Typography variant="caption" color="textSecondary">
-                        {new Date(notification.created_at).toLocaleString()}
-                      </Typography>
-                      {notification.status === 'pending' && (
-                        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => handleAccept(notification.id)}
-                          >
-                            Accept
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            color="secondary"
-                            onClick={() => handleDecline(notification.id)}
-                          >
-                            Decline
-                          </Button>
-                        </Box>
-                      )}
-                    </Box>
-                  ))
-                ) : (
-                  <Typography variant="body2" color="textSecondary">
-                    No new notifications
+        {/* Notifications dropdown */}
+        {showNotifications && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50px",
+              right: "10px",
+              width: "300px",
+              bgcolor: "background.paper",
+              boxShadow: 3,
+              borderRadius: 1,
+              zIndex: 1201,
+              p: 2,
+            }}
+          >
+            <Typography variant="h6" sx={{
+              color: "black",
+              backgroundColor: "white",
+            }}>Notifications</Typography>
+            {notifications.length > 0 ? (
+              notifications.map((notification) => (
+                <Box
+                  key={notification.id}
+                  sx={{
+                    borderBottom: "1px solid #ddd",
+                    pb: 1,
+                    mb: 1,
+                  }}
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: "black",
+                      backgroundColor: "white",
+                    }}
+                  >
+                    {notification.message || "No message available"}
                   </Typography>
-                )}
-              </Box>
+                  <Typography variant="caption" color="textSecondary">
+                    {new Date(notification.created_at).toLocaleString()}
+                  </Typography>
+                  {notification.status === 'pending' && (
+                    <Box sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleAccept(notification.id)}
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="secondary"
+                        onClick={() => handleDecline(notification.id)}
+                      >
+                        Decline
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
+              ))
+            ) : (
+              <Typography variant="body2" color="textSecondary">
+                No new notifications
+              </Typography>
             )}
-
-            <IconButton color="inherit" onClick={handleAccountClick}>
-              <AccountCircleIcon />
-            </IconButton>
-            {/* Popover for showing username */}
-            <Popover
-              id={id}
-              open={open}
-              anchorEl={anchorEl}
-              onClose={handleClose}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-            >
-              <Box sx={{ p: 2 }}>
-                <Typography variant="subtitle1">Hello, {username}!</Typography>
-              </Box>
-            </Popover>
-          </Toolbar>
-        </AppBar>
-        <Toolbar />
+          </Box>
+        )}
 
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 4 }}>
-        {loading ? (
+          {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
               <CircularProgress />
             </Box>
@@ -433,7 +461,7 @@ const EditorDashboard = () => {
                   variant="contained"
                   color="primary"
                   sx={{ mt: 2 }}
-                  onClick={() => navigate(`/workspace/${workspace.id}`)} // Dynamic routing
+                  onClick={() => navigate(`/workspace/${workspace.id}`)}
                 >
                   Enter Workspace
                 </Button>
@@ -441,12 +469,10 @@ const EditorDashboard = () => {
             ))
           ) : (
             <Typography variant="h6" color="textSecondary">No work assigned</Typography>
-          )
-          )}
+          ))}
         </Box>
-
       </Box>
-      {/* Snackbar for alerts */}
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

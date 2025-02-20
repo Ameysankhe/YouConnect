@@ -12,11 +12,32 @@ import workspaceDetailRoutes from './src/routes/workspaceDetails.js';
 import editorNotificationRoutes from './src/routes/editorNotifications.js';
 import uploadRoutes from './src/routes/upload.js';
 import { router as youtuberNotificationRoutes } from './src/routes/youtuberNotifications.js';
+import { createServer } from 'http';
+import { Server } from 'socket.io'
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+// Create HTTP Server and Attach Socket.IO
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
+
+// Socket.IO Connection Handler
+io.on('connection', (socket) => {
+  console.log(`⚡ User Connected: ${socket.id}`);
+
+  socket.on('disconnect', () => {
+    console.log(`❌ User Disconnected: ${socket.id}`);
+  });
+});
 
 
 // CORS configuration
@@ -72,6 +93,6 @@ app.use('/youtuber', youtuberNotificationRoutes);
 app.use('/api', uploadRoutes);
 
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

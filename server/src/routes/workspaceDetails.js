@@ -226,7 +226,7 @@ router.get('/:id/approve-videos', async (req, res) => {
   
     try {
       const result = await pool.query(
-        `SELECT id, title, description, thumbnail_url, video_url 
+        `SELECT id, title, description, tags, category, default_language, default_audio_language, privacy_status, thumbnail_url, video_url 
          FROM videos 
          WHERE workspace_id = $1 AND status = 'Pending' AND editor_id = $2`,
         [workspaceId, editorId]

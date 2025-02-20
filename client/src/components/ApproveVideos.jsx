@@ -1,87 +1,77 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import ReactPlayer from 'react-player';
-import { Card, CardContent, Typography, Button, CardActions, IconButton, Dialog, DialogContent, CircularProgress} from '@mui/material';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import CloseIcon from '@mui/icons-material/Close';
+import { Card, CardContent, Typography, Button, CardActions, CircularProgress } from '@mui/material';
 import axios from 'axios';
+import VideoReview from './VideoReview';
 
-const ApproveVideos = ({editorId}) => {
+const ApproveVideos = ({ editorId }) => {
   const { id } = useParams();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [playingVideoId, setPlayingVideoId] = useState(null);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isReviewing, setIsReviewing] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const truncateDescription = (description) => {
+    return description.length > 50
+      ? description.substring(0, 50) + '.....'
+      : description;
+    };
+  // Add a key to reset the component when editorId changes
+  const componentKey = `approve-videos-${editorId}`;
+
+  const fetchVideos = async () => {
+    try {
+      const response = await axios.get(`http://localhost:4000/workspace/${id}/approve-videos`, { params: { editorId } });
+      setVideos(response.data);
+      setLoading(false);
+      setIsReviewing(false);
+      setSelectedVideo(null);
+    } catch (error) {
+      console.error('Error fetching videos:', error);
+    }
+  };
 
   useEffect(() => {
-      const fetchVideos = async () => {
-        try {
-          const response = await axios.get(`http://localhost:4000/workspace/${id}/approve-videos`,{  params: { editorId }});
-          setVideos(response.data);  
-          setLoading(false);
-        } catch (error) {
-          console.error('Error fetching videos:', error);
-        }
-      };
-  
-      fetchVideos();
-    }, [id, editorId]);
-
-  const handleApprove = async (videoId) => {
-    try {
-      const response = await axios.post(`http://localhost:4000/api/approve-video`, {
-        videoId,
-        workspaceId: id, // Pass workspaceId explicitly
-        // editorId: editorId  Pass editorId when approving
-      });
-      alert(response.data.message);
-      setVideos(videos.filter((video) => video.id !== videoId));
-    } catch (error) {
-      console.error('Error approving video:', error);
-      alert('Failed to approve video.');
-    }
-  };
-
-  const handleReject = (videoId) => {
-    alert(`Video with ID ${videoId} rejected.`);
-    setVideos(videos.filter((video) => video.id !== videoId));
-  };
-
-  // const handleReject = async (videoId) => {
-  //   try {
-  //       const response = await axios.post(`http://localhost:4000/api/reject-video`, {
-  //           videoId,
-  //           workspaceId: id, // Pass workspaceId from useParams
-  //       });
-  //       alert(response.data.message);
-  //       setVideos(videos.filter((video) => video.id !== videoId));
-  //   } catch (error) {
-  //       console.error('Error rejecting video:', error);
-  //       alert('Failed to reject video.');
-  //   }
-  // };
-
-  const handlePlay = (videoId) => {
-    setPlayingVideoId(videoId);
-    setIsPopupOpen(true);
-  };
-
-  const handleClosePopup = () => {
-    setPlayingVideoId(null);
-    setIsPopupOpen(false);
-  };
+    fetchVideos();
+  }, [id, editorId, refreshKey]);
 
   if (loading) {
-    return(
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <CircularProgress />
-    </div>
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </div>
     );
-}
+  }
 
-   if (videos.length === 0) {
-          return <Typography>No videos for review.</Typography>;
-    }
+  if (videos.length === 0) {
+    return <Typography>No videos for review.</Typography>;
+  }
+
+  const handleReview = (video) => {
+    setSelectedVideo(video);
+    setIsReviewing(true);
+  };
+
+  const handleBackToList = () => {
+    setIsReviewing(false);
+    setSelectedVideo(null);
+    setRefreshKey(prevKey => prevKey + 1);
+  };
+
+  if (isReviewing && selectedVideo) {
+    return (
+      <div>
+        <Button
+          variant="outlined"
+          onClick={handleBackToList}
+          style={{ margin: '20px' }}
+        >
+          Back to Video List
+        </Button>
+        <VideoReview video={selectedVideo}  onBackToList={handleBackToList} />
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', padding: '20px' }}>
@@ -93,62 +83,18 @@ const ApproveVideos = ({editorId}) => {
               alt={video.title}
               style={{ width: '100%', height: '150px', objectFit: 'cover' }}
             />
-            <IconButton
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                color: 'white',
-                background: 'rgba(0, 0, 0, 0.5)',
-                padding: '10px',
-              }}
-              onClick={() => handlePlay(video.id)}
-            >
-              <PlayArrowIcon />
-            </IconButton>
           </div>
           <CardContent>
             <Typography variant="h6">{video.title}</Typography>
             <Typography variant="body2" color="textSecondary">
-              {video.description}
+              {truncateDescription(video.description)}
             </Typography>
           </CardContent>
           <CardActions>
-            <Button variant="contained" color="primary" onClick={() => handleApprove(video.id)}>
-              Approve
-            </Button>
-            <Button variant="outlined" color="secondary" onClick={() => handleReject(video.id)}>
-              Reject
-            </Button>
+            <Button variant="contained" color="primary" onClick={() => handleReview(video)}>Review</Button>
           </CardActions>
         </Card>
       ))}
-
-      {/* Popup Video Player */}
-      <Dialog open={isPopupOpen} onClose={handleClosePopup} maxWidth="md" fullWidth>
-        <DialogContent style={{ padding: '0', position: 'relative' }}>
-          <IconButton
-            style={{ position: 'absolute', top: '10px', right: '10px', zIndex: '1' }}
-            onClick={handleClosePopup}
-          >
-            <CloseIcon />
-          </IconButton>
-          {playingVideoId && (
-            <div style={{ position: 'relative', paddingTop: '56.25%' /* 16:9 aspect ratio */, overflow: 'hidden' }}>
-              <ReactPlayer
-                url={videos.find((video) => video.id === playingVideoId).video_url}
-                playing
-                controls
-                width="100%"
-                height="100%"
-                style={{ position: 'absolute', top: 0, left: 0 }}
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
     </div>
   );
 };

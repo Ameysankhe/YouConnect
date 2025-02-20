@@ -18,11 +18,11 @@ import {
     Menu,
     MenuItem,
     Snackbar,
-    Alert,
+    Alert,              
     Popover,
     CircularProgress,
 } from '@mui/material';
-import { AddCircle, Logout, Notifications, AccountCircle, Close } from '@mui/icons-material';
+import { AddCircle, Logout, Notifications, AccountCircle, Close, Menu as MenuIcon } from '@mui/icons-material';
 import MoreVertIcon from '@mui/icons-material/MoreVert'; // Three dots icon
 
 const drawerWidth = 240;
@@ -37,6 +37,7 @@ const YoutuberDashboard = () => {
     const [menuAnchorEl, setMenuAnchorEl] = useState(null); // For Menu anchor
     const [popoverAnchorEl, setPopoverAnchorEl] = useState(null); // For Popover anchor
     const [selectedWorkspace, setSelectedWorkspace] = useState(null); // To store the workspace being selected
+    const [drawerOpen, setDrawerOpen] = useState(true);
 
     // Snackbar state
     const [snackbar, setSnackbar] = useState({
@@ -190,6 +191,15 @@ const YoutuberDashboard = () => {
             {/* AppBar with Icons */}
             <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
                 <Toolbar>
+                    <IconButton
+                        color="inherit"
+                        aria-label="toggle drawer"
+                        edge="start"
+                        onClick={() => setDrawerOpen(!drawerOpen)}
+                        sx={{ mr: 2 }}
+                    >
+                        <MenuIcon />
+                    </IconButton>
                     <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
                         YouConnect
                     </Typography>
@@ -221,8 +231,18 @@ const YoutuberDashboard = () => {
                 sx={{
                     width: drawerWidth,
                     flexShrink: 0,
-                    '& .MuiDrawer-paper': { width: drawerWidth, boxSizing: 'border-box' },
+                    '& .MuiDrawer-paper': {
+                        width: drawerWidth,
+                        boxSizing: 'border-box',
+                        position: 'fixed',
+                        height: '100vh',
+                        transition: 'width 0.2s',
+                        whiteSpace: 'nowrap',
+                        width: drawerOpen ? drawerWidth : 0,
+                        overflowX: 'hidden'
+                    },
                 }}
+                open={drawerOpen}
             >
                 <Toolbar />
                 <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -243,50 +263,56 @@ const YoutuberDashboard = () => {
             </Drawer>
 
             {/* Main Content */}
-            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                <Toolbar />
+            <Box component="main" sx={{
+                flexGrow: 1,
+                p: 3,
+                marginTop: 8,
+                transition: 'margin-left 0.2s',
+                marginLeft: drawerOpen ? 0 : `-${drawerWidth}px`,
+            }}>
+                {/* <Toolbar /> */}
                 {/* Show 'No Workspace' or Workspace Cards */}
                 {loading ? (
-                <Box textAlign="center" mt={5}>
-                    <CircularProgress />
-                </Box>
-                ) : (
-                <>
-                {workspaces.length === 0 ? (
                     <Box textAlign="center" mt={5}>
-                        <Typography variant="h5">No Workspace Created</Typography>
-                        <IconButton onClick={() => setOpenModal(true)} sx={{ mt: 2 }}>
-                            <AddCircle sx={{ fontSize: 50 }} />
-                        </IconButton>
+                        <CircularProgress />
                     </Box>
                 ) : (
-                    <Box display="flex" flexWrap="wrap" gap="20px">
-                        {workspaces.map((workspace) => (
-                            <Card key={workspace.id} sx={{ width: 250, position: 'relative' }}>
-                                <IconButton
-                                    sx={{ position: 'absolute', top: 8, right: 8 }}
-                                    onClick={(event) => handleMenuClick(event, workspace)} // Open menu when clicked
-                                >
-                                    <MoreVertIcon />
+                    <>
+                        {workspaces.length === 0 ? (
+                            <Box textAlign="center" mt={5}>
+                                <Typography variant="h5">No Workspace Created</Typography>
+                                <IconButton onClick={() => setOpenModal(true)} sx={{ mt: 2 }}>
+                                    <AddCircle sx={{ fontSize: 50 }} />
                                 </IconButton>
-                                <CardContent>
-                                    <Typography variant="h6" sx={{ borderBottom: '2px solid black', paddingBottom: '4px' }}>{workspace.name}</Typography>
-                                    <Typography variant="body2" sx={{ marginBottom: '16px', marginTop: '10px' }}>{workspace.description}</Typography>
-                                    <Button
-                                        variant="contained"
-                                        fullWidth
-                                        sx={{ mt: 2 }}
-                                        onClick={() => window.location.href = `/workspace/${workspace.id}`}
-                                    >
-                                        Enter Workspace
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </Box>
+                            </Box>
+                        ) : (
+                            <Box display="flex" flexWrap="wrap" gap="20px">
+                                {workspaces.map((workspace) => (
+                                    <Card key={workspace.id} sx={{ width: 250, position: 'relative' }}>
+                                        <IconButton
+                                            sx={{ position: 'absolute', top: 8, right: 8 }}
+                                            onClick={(event) => handleMenuClick(event, workspace)} // Open menu when clicked
+                                        >
+                                            <MoreVertIcon />
+                                        </IconButton>
+                                        <CardContent>
+                                            <Typography variant="h6" sx={{ borderBottom: '2px solid black', paddingBottom: '4px' }}>{workspace.name}</Typography>
+                                            <Typography variant="body2" sx={{ marginBottom: '16px', marginTop: '10px' }}>{workspace.description}</Typography>
+                                            <Button
+                                                variant="contained"
+                                                fullWidth
+                                                sx={{ mt: 2 }}
+                                                onClick={() => window.location.href = `/workspace/${workspace.id}`}
+                                            >
+                                                Enter Workspace
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </Box>
+                        )}
+                    </>
                 )}
-                </>
-            )}
             </Box>
 
             {/* Floating Form (Modal) */}

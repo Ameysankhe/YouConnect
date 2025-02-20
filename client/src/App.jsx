@@ -19,7 +19,7 @@ const App = () => {
                         <Route path="/reset-password" element={<ResetPassword />} />
                         <Route path='/editor/dashboard' element={<EditorDashboard />} />
                         <Route path='/youtuber/dashboard' element={<YoutuberDashboard />} />
-                        <Route path="/workspace/:id" element={<WorkspacePage />} /> 
+                        <Route path="/workspace/:id" element={<WorkspacePage />} />
                     </Routes>
         </BrowserRouter>
     </div>

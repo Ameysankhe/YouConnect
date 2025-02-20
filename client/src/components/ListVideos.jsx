@@ -12,6 +12,12 @@ const ListVideos = () => {
     const { id } = useParams();
     const [videosList, setVideosList] = useState([]);
     const [loading, setLoading] = useState(true);
+    // Function to truncate description
+    const truncateDescription = (description) => {
+        return description.length > 50 
+            ? description.substring(0, 50) + '.....' 
+            : description;
+    };
     
     useEffect(() => {
         const fetchVideosList = async () => {
@@ -74,7 +80,7 @@ const ListVideos = () => {
                             <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                                 <Typography variant="h6">{video.title}</Typography>
                                 <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 1 }}>
-                                    {video.description}
+                                    {truncateDescription(video.description)}
                                 </Typography>
                                 <div style={{ marginTop: 'auto', alignSelf: 'flex-end', display: 'flex', alignItems: 'center' }}>
                                     {/* Conditional Rendering for Icons */}
