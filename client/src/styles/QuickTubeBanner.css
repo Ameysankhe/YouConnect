@@ -9,21 +9,20 @@
   margin-top: 80px;
 }
 
-.quicktube-banner h1 {
-  font-size: 100px;
+.quicktube-banner h4 {
+  font-size: 4.5rem;
   font-weight: bold;
   margin: 0;
 }
 
 .quicktube-banner .hashtag {
-  color: #0400e0; /* A similar shade to match #Quicktube */
-}
+  color: #0400e0;
+} 
 
 .quicktube-banner p {
-  font-size: 18px;
   margin-top: 10px;
   margin-bottom: 30px;
-  font-size: 40px;
+  font-size: 25px;
 }
 
 .quicktube-banner::before {

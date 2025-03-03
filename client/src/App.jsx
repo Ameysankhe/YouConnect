@@ -7,6 +7,7 @@ import ResetPassword from './components/ResetPassword';
 import EditorDashboard from './components/EditorDashboard';
 import YoutuberDashboard from './components/YoutuberDashboard';
 import WorkspacePage from './components/WorkspacePage'; 
+import ContactForm from './components/ContactForm'
 
 const App = () => {
   return (
@@ -20,10 +21,11 @@ const App = () => {
                         <Route path='/editor/dashboard' element={<EditorDashboard />} />
                         <Route path='/youtuber/dashboard' element={<YoutuberDashboard />} />
                         <Route path="/workspace/:id" element={<WorkspacePage />} />
+                        <Route path="/contact" element={<ContactForm />} />
                     </Routes>
         </BrowserRouter>
     </div>
   )
 }
 
-export default App
+export default App;

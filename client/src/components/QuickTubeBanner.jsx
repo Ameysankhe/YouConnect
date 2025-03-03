@@ -5,15 +5,14 @@ import GetStartedButton from './GetStartedButton';
 const QuickTubeBanner = () => {
   return (
     <div className="quicktube-banner">
-      <h1>
+      <h4>
         Introducing <span className="hashtag">#YouConnect</span>
-      </h1>
+      </h4>
       <p>
         Accelerating your YouTube journey with Instant solutions
         <br />
         and Endless Possibilities
       </p>
-      
       <GetStartedButton/>
     </div>
   );

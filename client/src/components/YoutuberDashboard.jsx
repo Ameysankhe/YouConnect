@@ -18,7 +18,7 @@ import {
     Menu,
     MenuItem,
     Snackbar,
-    Alert,              
+    Alert,
     Popover,
     CircularProgress,
 } from '@mui/material';
@@ -45,6 +45,14 @@ const YoutuberDashboard = () => {
         message: '',
         severity: 'info',
     });
+
+    const darkTheme = {
+        background: '#000000',
+        paper: '#111111',
+        primary: '#0000FF',
+        text: '#FFFFFF',
+        border: '#333333'
+    };
 
     // Show Snackbar
     const showSnackbar = (message, severity = 'info') => {
@@ -187,9 +195,19 @@ const YoutuberDashboard = () => {
     // };
 
     return (
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{
+            display: 'flex',
+            bgcolor: darkTheme.background,
+            minHeight: '100vh',
+            color: darkTheme.text
+        }}>
             {/* AppBar with Icons */}
-            <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+            <AppBar position="fixed" sx={{
+                zIndex: (theme) => theme.zIndex.drawer + 1,
+                bgcolor: darkTheme.paper,
+                borderBottom: `1px solid ${darkTheme.border}`,
+                boxShadow: 'none'
+            }}>
                 <Toolbar>
                     <IconButton
                         color="inherit"
@@ -200,7 +218,11 @@ const YoutuberDashboard = () => {
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6" noWrap sx={{
+                        flexGrow: 1,
+                        color: darkTheme.text,
+                        fontWeight: 'bold'
+                    }}>
                         YouConnect
                     </Typography>
                     <IconButton color="inherit">
@@ -234,6 +256,9 @@ const YoutuberDashboard = () => {
                     '& .MuiDrawer-paper': {
                         width: drawerWidth,
                         boxSizing: 'border-box',
+                        bgcolor: darkTheme.paper,
+                        borderRight: `1px solid ${darkTheme.border}`,
+                        color: darkTheme.text,
                         position: 'fixed',
                         height: '100vh',
                         transition: 'width 0.2s',
@@ -248,14 +273,14 @@ const YoutuberDashboard = () => {
                 <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <List>
                         <ListItem button onClick={() => setOpenModal(true)} >
-                            <ListItemIcon><AddCircle /></ListItemIcon>
+                            <ListItemIcon><AddCircle sx={{ color: darkTheme.primary }} /></ListItemIcon>
                             <ListItemText primary="Create Workspace" />
                         </ListItem>
                     </List>
                     <Box sx={{ flexGrow: 1 }} />
                     <List>
                         <ListItem button onClick={handleLogout}>
-                            <ListItemIcon><Logout /></ListItemIcon>
+                            <ListItemIcon><Logout  sx={{ color: darkTheme.text }} /></ListItemIcon>
                             <ListItemText primary="Logout" />
                         </ListItem>
                     </List>
@@ -269,18 +294,17 @@ const YoutuberDashboard = () => {
                 marginTop: 8,
                 transition: 'margin-left 0.2s',
                 marginLeft: drawerOpen ? 0 : `-${drawerWidth}px`,
+                bgcolor: darkTheme.background
             }}>
-                {/* <Toolbar /> */}
-                {/* Show 'No Workspace' or Workspace Cards */}
                 {loading ? (
                     <Box textAlign="center" mt={5}>
-                        <CircularProgress />
+                        <CircularProgress sx={{ color: darkTheme.primary }}/>
                     </Box>
                 ) : (
                     <>
                         {workspaces.length === 0 ? (
                             <Box textAlign="center" mt={5}>
-                                <Typography variant="h5">No Workspace Created</Typography>
+                                <Typography variant="h5" sx={{color: darkTheme.text}}>No Workspace Created</Typography>
                                 <IconButton onClick={() => setOpenModal(true)} sx={{ mt: 2 }}>
                                     <AddCircle sx={{ fontSize: 50 }} />
                                 </IconButton>
@@ -288,20 +312,20 @@ const YoutuberDashboard = () => {
                         ) : (
                             <Box display="flex" flexWrap="wrap" gap="20px">
                                 {workspaces.map((workspace) => (
-                                    <Card key={workspace.id} sx={{ width: 250, position: 'relative' }}>
+                                    <Card key={workspace.id} sx={{ width: 250, bgcolor: darkTheme.paper,  border: `1px solid ${darkTheme.border}`,  borderRadius: 2, position: 'relative' }}>
                                         <IconButton
                                             sx={{ position: 'absolute', top: 8, right: 8 }}
                                             onClick={(event) => handleMenuClick(event, workspace)} // Open menu when clicked
                                         >
-                                            <MoreVertIcon />
+                                            <MoreVertIcon sx={{color: darkTheme.text}}/>
                                         </IconButton>
                                         <CardContent>
-                                            <Typography variant="h6" sx={{ borderBottom: '2px solid black', paddingBottom: '4px' }}>{workspace.name}</Typography>
-                                            <Typography variant="body2" sx={{ marginBottom: '16px', marginTop: '10px' }}>{workspace.description}</Typography>
+                                            <Typography variant="h6" sx={{  borderBottom: `2px solid ${darkTheme.text}`, paddingBottom: '4px', color: darkTheme.text }}>{workspace.name}</Typography>
+                                            <Typography variant="body2" sx={{ marginBottom: '16px', marginTop: '10px', color: 'rgba(255,255,255,0.7)',}}>{workspace.description}</Typography>
                                             <Button
                                                 variant="contained"
                                                 fullWidth
-                                                sx={{ mt: 2 }}
+                                                sx={{ mt: 2,  bgcolor: darkTheme.primary}}
                                                 onClick={() => window.location.href = `/workspace/${workspace.id}`}
                                             >
                                                 Enter Workspace
@@ -325,17 +349,19 @@ const YoutuberDashboard = () => {
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
-                        bgcolor: 'background.paper',
+                        bgcolor: darkTheme.paper,
+                        border: `1px solid ${darkTheme.border}`,
                         boxShadow: 24,
                         p: 4,
-                        borderRadius: 2,
+                        borderRadius: 2,    
                         width: 400,
+                        color: darkTheme.text
                     }}
                 >
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                         <Typography variant="h6">Create Workspace</Typography>
                         <IconButton onClick={() => setOpenModal(false)}>
-                            <Close />
+                            <Close sx={{color: darkTheme.text}}/>
                         </IconButton>
                     </Box>
                     <TextField
@@ -344,6 +370,20 @@ const YoutuberDashboard = () => {
                         margin="normal"
                         value={workspaceName}
                         onChange={(e) => setWorkspaceName(e.target.value)}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                color: darkTheme.text,
+                                '& fieldset': {
+                                    borderColor: darkTheme.border,
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: darkTheme.primary,
+                                },
+                            },
+                            '& .MuiInputLabel-root': {
+                                color: 'rgba(255,255,255,0.7)',
+                            },
+                        }}
                         required
                     />
                     <TextField
@@ -354,8 +394,23 @@ const YoutuberDashboard = () => {
                         rows={3}
                         value={workspaceDescription}
                         onChange={(e) => setWorkspaceDescription(e.target.value)}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                color: darkTheme.text,
+                                '& fieldset': {
+                                    borderColor: darkTheme.border,
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: darkTheme.primary,
+                                },
+                            },
+                            '& .MuiInputLabel-root': {
+                                color: 'rgba(255,255,255,0.7)',
+                            },
+                        }}
+                        required
                     />
-                    <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
+                    <Button type="submit" variant="contained" fullWidth sx={{ mt: 2,  bgcolor: darkTheme.primary}}>
                         Submit
                     </Button>
                 </Box>

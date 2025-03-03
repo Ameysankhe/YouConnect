@@ -14,10 +14,7 @@ const Navbar = () => {
           <a href="#about" className="navbar-link">About Us</a>
         </li>
         <li className="navbar-item">
-          <a href="#price" className="navbar-link">Pricing</a>
-        </li>
-        <li className="navbar-item">
-          <a href="#contact" className="navbar-link">Contact</a>
+          <a href="/contact" className="navbar-link">Contact</a>
         </li>
       </ul>
       <div className="navbar-buttons">
