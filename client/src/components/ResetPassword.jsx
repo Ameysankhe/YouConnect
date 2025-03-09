@@ -98,10 +98,10 @@ function ResetPassword() {
                     sx={{
                         width: '100%',
                         maxWidth: '600px',
-                        wordWrap: 'break-word', // Ensure text wraps for long messages
-                        fontSize: '1rem', // Adjust font size if needed
+                        wordWrap: 'break-word', 
+                        fontSize: '1rem',
                         display: 'flex',
-                        justifyContent: 'center', // Center-align content
+                        justifyContent: 'center', 
                     }}
                 >
                     {alert.message}

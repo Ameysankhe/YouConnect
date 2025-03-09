@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import pool from './db.js'; // PostgreSQL connection
+import pool from './db.js'; 
 
 export const getAuthorizedClient = async (workspaceId) => {
     try {

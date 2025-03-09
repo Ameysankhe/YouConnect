@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import ReactPlayer from 'react-player';
 import {
   Box,
@@ -13,7 +13,9 @@ import {
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import axios from 'axios';
+import { WebSocketContext } from '../context/WebSocketProvider';
 import { useParams } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const VideoReview = ({ video, onBackToList }) => {
   const { id } = useParams();
@@ -27,11 +29,12 @@ const VideoReview = ({ video, onBackToList }) => {
     privacyStatus: ''
   });
 
-  const [uploadProgress, setUploadProgress] = useState(65);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [played, setPlayed] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const socket = useContext(WebSocketContext);
 
   useEffect(() => {
     if (video) {
@@ -47,46 +50,88 @@ const VideoReview = ({ video, onBackToList }) => {
     }
   }, [video]);
 
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('approveProgress', (data) => {
+      console.log('Approval progress:', data);
+      setUploadProgress(data.progress);
+    });
+    return () => {
+      socket.off('approveProgress');
+    };
+  }, [socket]);
+
   const handleApprove = async (videoId) => {
     try {
       setIsUploading(true);
       const response = await axios.post(`http://localhost:4000/api/approve-video`, {
         videoId,
-        workspaceId: id, // Pass workspaceId explicitly
-        // editorId: editorId  Pass editorId when approving
+        workspaceId: id,
       });
-      const confirmResult = window.confirm(response.data.message);
-      if (confirmResult) {
-        onBackToList();
-      }
+      // const confirmResult = window.confirm(response.data.message);
+      // if (confirmResult) {
+      //   onBackToList();
+      // }
+      Swal.fire({
+        icon: 'success',
+        title: 'Upload Successful!',
+        text: response.data.message,
+        backdrop: false,
+        confirmButtonText: 'OK',
+        customClass: {
+          popup: 'my-custom-popup-class',
+          title: 'my-custom-title-class',
+          content: 'my-custom-content-class'
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          onBackToList();
+        }
+      });
     } catch (error) {
       console.error('Error approving video:', error);
-      alert('Failed to approve video.');
+      // alert('Failed to approve video.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Upload Failed',
+        text: 'Failed to upload video. Please try again.',
+        backdrop: false,
+        customClass: {
+          popup: 'my-custom-popup-class',
+          title: 'my-custom-title-class',
+          content: 'my-custom-content-class'
+        }
+      });
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleReject = (videoId) => {
-    if (!isUploading) {
-      alert(`Video with ID ${videoId} rejected.`);
+  const handleReject = async (videoId) => {
+    try {
+      setIsUploading(true);
+      const response = await axios.post('http://localhost:4000/api/reject-video', { videoId, workspaceId: id }, { withCredentials: true });
+      Swal.fire({
+        icon: 'success',
+        title: 'Editor Notified Successfully',
+        text: response.data.message,
+        backdrop: false,
+        confirmButtonText: 'OK'
+      }).then(() => {
+        onBackToList();
+      });
+    } catch (error) {
+      console.error('Error rejecting video:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Rejection Failed',
+        text: 'Failed to reject video. Please try again.',
+        backdrop: false
+      });
+    } finally {
+      setIsUploading(false);
     }
   };
-
-  // const handleReject = async (videoId) => {
-  //   try {
-  //       const response = await axios.post(`http://localhost:4000/api/reject-video`, {
-  //           videoId,
-  //           workspaceId: id, // Pass workspaceId from useParams
-  // editorId: editorId  Pass editorId when approving
-  //       });
-  //       alert(response.data.message);
-  //       setVideos(videos.filter((video) => video.id !== videoId));
-  //   } catch (error) {
-  //       console.error('Error rejecting video:', error);
-  //       alert('Failed to reject video.');
-  //   }
-  // };
 
   const handlePlayVideo = () => {
     if (!isUploading) {
@@ -228,17 +273,25 @@ const VideoReview = ({ video, onBackToList }) => {
               </IconButton>
             </>
           )
-        ) : (
-           <Typography color="gray">No Video Available</Typography>
-        )}
+          ) : (
+            <Typography color="gray">No Video Available</Typography>
+          )}
         </Card>
 
         {/* Progress Bar */}
         <Card>
           <CardContent>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+            {/* <Typography variant="body2" color="text.secondary" gutterBottom>
               Upload Progress
-            </Typography>
+            </Typography> */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Upload Progress
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                {Math.round(uploadProgress)}%
+              </Typography>
+            </Box>
             <LinearProgress variant="determinate" value={uploadProgress} />
           </CardContent>
         </Card>
@@ -252,7 +305,7 @@ const VideoReview = ({ video, onBackToList }) => {
               color="success"
               onClick={() => handleApprove(video.id)}
               disabled={isUploading}
-              sx={{ height: '48px',  opacity: isUploading ? 0.7 : 1 }}
+              sx={{ height: '48px', opacity: isUploading ? 0.7 : 1 }}
             >
               Approve
             </Button>
@@ -264,7 +317,7 @@ const VideoReview = ({ video, onBackToList }) => {
               color="error"
               onClick={() => handleReject(video.id)}
               disabled={isUploading}
-              sx={{ height: '48px',  opacity: isUploading ? 0.7 : 1}}
+              sx={{ height: '48px', opacity: isUploading ? 0.7 : 1 }}
             >
               Reject
             </Button>

@@ -7,12 +7,12 @@ const router = express.Router();
 // Route to fetch workspace details by ID and the user's role
 router.get('/:id', async (req, res) => {
     const workspaceId = req.params.id;
-    const userId = req.user.id; // Assuming user is authenticated and their ID is available here
+    const userId = req.user.id; 
 
     try {
-        // Query to get workspace details
+        
         const workspaceQuery = `
-            SELECT id, name, description, created_at, oauth_token
+            SELECT id, name, description, created_at, oauth_token, owner_id
             FROM workspaces
             WHERE id = $1
         `;
@@ -22,7 +22,8 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Workspace not found' });
         }
 
-        // Query to get user role
+        const workspace = workspaceResult.rows[0];
+
         const roleQuery = `
             SELECT role
             FROM users
@@ -34,20 +35,34 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const role = roleResult.rows[0].role; // Get user role from the result
+        const userRole = roleResult.rows[0].role;
 
-        // Send back the workspace details along with the user's role
-        res.status(200).json({
-            workspace: workspaceResult.rows[0], // Workspace details
-            userRole: role // User role
-        });
+        const isOwner = workspace.owner_id === userId;
 
+        const isEditor = await pool.query(`
+            SELECT 
+            FROM workspace_editors
+            WHERE workspace_id = $1 AND editor_id = $2 AND status = 'Accepted'
+        `, [workspaceId, userId]);
+
+        if (isOwner || isEditor.rows.length > 0) {
+            // User has access: return workspace details + role
+            return res.status(200).json({
+                workspace: workspace,
+                userRole: userRole
+            });
+        } else {
+            // User has no access: return 403 with role
+            return res.status(403).json({
+                error: 'You do not have permission to access this workspace',
+                userRole: userRole // Include the role here!
+            });
+        }    
     } catch (error) {
         console.error('Error fetching workspace details:', error);
         res.status(500).json({ error: 'An error occurred while fetching workspace details.' });
     }
 });
-
 
 // Revoke access from Google
 const revokeGoogleAccess = async (oauthToken) => {
@@ -127,8 +142,6 @@ router.post('/:id/add-editor', async (req, res) => {
         const result = await pool.query(query, [workspaceId, editorId]);
 
         if (result.rows.length > 0) {
-            // Optionally, send a notification to the editor (in-app or email)
-            // For now, we can assume the editor will be notified upon their next login or dashboard load
             const workspaceEditorId = result.rows[0].id;
 
             // Fetch the workspace name
@@ -140,8 +153,8 @@ router.post('/:id/add-editor', async (req, res) => {
 
                 // Create a notification for the editor
                 const message = `You have been invited to join workspace '${workspaceName}'.`;
-                const actionType = 'invite';  // Example action type (can be customized)
-                const status = 'pending';  // Initial status of the notification
+                const actionType = 'invite';  
+                const status = 'pending';  
 
                 // Insert notification into the database
                 const notificationQuery = `

@@ -8,7 +8,7 @@
     transition: transform 0.3s;
     gap: 20px;
     padding: 40px;
-    width: 400px;
+    /* width: 400px; */
     position: static;
     margin-bottom:  100px ;
   }
@@ -18,7 +18,7 @@
   }
   
   .icon-container {
-    background-color: #1e1e1e;
+    background-color: #5050ff;
     border-radius: 50%;
     width: 60px;
     height: 60px;

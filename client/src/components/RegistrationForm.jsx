@@ -85,7 +85,7 @@ const RegistrationForm = () => {
         <>
             <div className="registration-form">
                 <form onSubmit={handleSubmit}>
-                    <h1>Registration Form</h1>
+                    <h4>Registration Form</h4>
                     <div className="input-box">
                         <input
                             type="text"

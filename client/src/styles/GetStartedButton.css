@@ -1,17 +1,19 @@
 .btn {
-    background-color: #0400e0;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 25px;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: background-color 0.3s;
-    width: 200px;
-    height:50px
-  }
+  font-family: 'Gilroy', sans-serif;
+  background: linear-gradient(to right, #4f46e5, #050A30);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.5s ease-in-out;
+  width: 200px;
+  height: 50px;
+}
 
-  .btn:hover {
-    background-color: #00004d;
-  }
+.btn:hover {
+  background: linear-gradient(to right, #3730a3, #050A30);
+  transform: translateY(-5px) scale(1.1);
+}

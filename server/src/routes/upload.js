@@ -4,6 +4,7 @@ import storage from '../config/firebase.js';
 import pool from '../config/db.js';
 import { getAuthorizedClient } from '../config/youtubeAuth.js'; // Helper for OAuth authentication
 import { google } from 'googleapis';
+import { Readable } from 'stream';
 
 const router = express.Router();
 
@@ -16,6 +17,7 @@ router.post('/upload', upload.fields([{ name: 'video' }, { name: 'thumbnail' }])
         const { title, description, tags, category, default_language, default_audio_language, privacy_status, workspace_id } = req.body;
         const videoFile = req.files['video'][0];
         const thumbnailFile = req.files['thumbnail'][0];
+        const io = req.io;
 
         // Validate required fields
         if (!title || !description || !tags || !category || !default_language || !default_audio_language || !privacy_status || !videoFile || !thumbnailFile) {
@@ -32,17 +34,68 @@ router.post('/upload', upload.fields([{ name: 'video' }, { name: 'thumbnail' }])
         const videoId = Date.now(); // Unique ID for the video
         const bucket = storage.bucket('youconnect-9671a.firebasestorage.app');
 
-        // Upload video to Firebase Storage
+        // Define file paths
         const videoPath = `videos/${workspace_id}/${videoId}/${videoFile.originalname}`;
-        await bucket.file(videoPath).save(videoFile.buffer, { contentType: videoFile.mimetype });
-
-        // Upload thumbnail to Firebase Storage
         const thumbnailPath = `videos/${workspace_id}/${videoId}/${thumbnailFile.originalname}`;
-        await bucket.file(thumbnailPath).save(thumbnailFile.buffer, { contentType: thumbnailFile.mimetype });
+
+        // ------------------ Video Upload with Progress ------------------
+        let videoUploadedBytes = 0;
+        const videoTotalBytes = videoFile.size;
+        // Create a readable stream from the video buffer
+        const videoReadableStream = Readable.from(videoFile.buffer);
+        // Create a write stream for video upload
+        const videoUploadStream = bucket.file(videoPath).createWriteStream({
+            metadata: { contentType: videoFile.mimetype }
+        });
+
+        // Listen for data chunks to calculate progress
+        videoReadableStream.on('data', (chunk) => {
+            videoUploadedBytes += chunk.length;
+            const progressPercentage = Math.round((videoUploadedBytes / videoTotalBytes) * 100);
+            io.to(String(editor_id)).emit('videoUploadProgress', { videoId, progress: progressPercentage });
+        });
+
+        await new Promise((resolve, reject) => {
+            videoUploadStream.on('finish', resolve);
+            videoUploadStream.on('error', reject);
+            videoReadableStream.pipe(videoUploadStream);
+        });
+
+        // Emit additional status update: Video upload complete (25% overall)
+        io.to(String(editor_id)).emit('uploadStatus', { stage: "Video Uploaded", progress: 25, message: "Video file uploaded." });
+
+        // ------------------ Thumbnail Upload with Progress ------------------
+        let thumbnailUploadedBytes = 0;
+        const thumbnailTotalBytes = thumbnailFile.size;
+        // Create a readable stream from the thumbnail buffer
+        const thumbnailReadableStream = Readable.from(thumbnailFile.buffer);
+        // Create a write stream for thumbnail upload
+        const thumbnailUploadStream = bucket.file(thumbnailPath).createWriteStream({
+            metadata: { contentType: thumbnailFile.mimetype }
+        });
+
+        // Listen for data chunks to calculate progress
+        thumbnailReadableStream.on('data', (chunk) => {
+            thumbnailUploadedBytes += chunk.length;
+            const progressPercentage = Math.round((thumbnailUploadedBytes / thumbnailTotalBytes) * 100);
+            io.to(String(editor_id)).emit('thumbnailUploadProgress', { videoId, progress: progressPercentage });
+        });
+
+        await new Promise((resolve, reject) => {
+            thumbnailUploadStream.on('finish', resolve);
+            thumbnailUploadStream.on('error', reject);
+            thumbnailReadableStream.pipe(thumbnailUploadStream);
+        });
+
+        // Emit status update: File uploads complete
+        io.to(String(editor_id)).emit('uploadStatus', { stage: "Files Uploaded", progress: 50, message: "Files uploaded. Generating public URLs..." });
 
         // Generate public URLs
         const videoUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(videoPath)}?alt=media`;
         const thumbnailUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(thumbnailPath)}?alt=media`;
+
+        // Emit status update: Public URLs generated
+        io.to(String(editor_id)).emit('uploadStatus', { stage: "Generating URLs", progress: 65, message: "Public URLs generated. Storing metadata..." });
 
         // Insert metadata into PostgreSQL
         const query = `
@@ -53,6 +106,9 @@ router.post('/upload', upload.fields([{ name: 'video' }, { name: 'thumbnail' }])
         const values = [title, description, tags ? tags.split(',') : [], category, default_language, default_audio_language, privacy_status, videoUrl, thumbnailUrl, workspace_id, editor_id];
         const result = await pool.query(query, values);
         const uploadedVideoId = result.rows[0].id;
+
+        // Emit status update: Metadata stored
+        io.to(String(editor_id)).emit('uploadStatus', { stage: "Storing Metadata", progress: 80, message: "Metadata stored. Sending notification..." });
 
         // Send notification to the YouTuber
 
@@ -80,6 +136,9 @@ router.post('/upload', upload.fields([{ name: 'video' }, { name: 'thumbnail' }])
      `;
         const notificationValues = [youtuber.recipient_id, message, workspace_id, uploadedVideoId];
         await pool.query(notificationQuery, notificationValues);
+
+        // Emit final status update
+        io.to(String(editor_id)).emit('uploadStatus', { stage: "Complete", progress: 100, message: "Upload complete!" });
 
         return res.status(201).json({ message: 'Video uploaded successfully.', videoId: result.rows[0].id });
     } catch (error) {
@@ -118,15 +177,37 @@ router.post('/approve-video', async (req, res) => {
             return res.status(404).json({ message: 'Editor not found or role mismatch.' });
         }
 
+        // Fetch YouTuber (workspace owner) details to send progress updates
+        const youtuberQuery = `
+         SELECT u.id AS recipient_id, u.username AS recipient_name
+         FROM workspaces w
+         INNER JOIN users u ON w.owner_id = u.id
+         WHERE w.id = $1
+        `;
+        const youtuberResult = await pool.query(youtuberQuery, [workspaceId]);
+        const youtuber = youtuberResult.rows[0];
+
+        if (!youtuber) {
+            return res.status(404).json({ message: 'YouTuber not found for the specified workspace.' });
+        }
+
+        // We'll emit progress events to the youtuber's room
+        const youtuberRoom = String(youtuber.recipient_id);
+        const io = req.io;
+
+        // Emit initial progress: Approval process starting (10%)
+        io.to(String(youtuberRoom)).emit('approveProgress', { progress: 10, stage: 'Starting approval process' });
+
+
         // Firebase Storage paths
-        const bucket = storage.bucket();        
+        const bucket = storage.bucket();
         const videoFilePath = video.video_url.replace(`https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/`, '').split('?')[0];
         const thumbnailFilePath = video.thumbnail_url.replace(`https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/`, '').split('?')[0];
 
         // Avoid double encoding by using the file paths directly
         const videoFile = bucket.file(decodeURIComponent(videoFilePath));
         const thumbnailFile = bucket.file(decodeURIComponent(thumbnailFilePath));
-   
+
         // Create read streams for video and thumbnail
         const videoStream = videoFile.createReadStream();
         const thumbnailStream = thumbnailFile.createReadStream();
@@ -138,6 +219,10 @@ router.post('/approve-video', async (req, res) => {
         // Authenticate YouTube API client
         const auth = await getAuthorizedClient(workspaceId); // Pass the workspace ID to fetch their OAuth token
         const youtube = google.youtube({ version: 'v3', auth });
+
+        // Upload video to YouTube
+        // (Here, progress is simulated since youtube.videos.insert does not emit progress events)
+        io.to(String(youtuberRoom)).emit('approveProgress', { progress: 30, stage: 'Uploading video to YouTube' });
 
         // Upload video to YouTube
         const uploadResponse = await youtube.videos.insert({
@@ -160,7 +245,11 @@ router.post('/approve-video', async (req, res) => {
             },
         });
 
+        io.to(String(youtuberRoom)).emit('approveProgress', { progress: 50, stage: 'Video uploaded to YouTube' });
+
         const youtubeVideoId = uploadResponse.data.id;
+
+        io.to(String(youtuberRoom)).emit('approveProgress', { progress: 65, stage: 'Setting thumbnail on YouTube' });
 
         // Set the thumbnail
         await youtube.thumbnails.set({
@@ -170,9 +259,16 @@ router.post('/approve-video', async (req, res) => {
             },
         });
 
+        io.to(String(youtuberRoom)).emit('approveProgress', { progress: 75, stage: 'Thumbnail set' });
+
+        // Update video status in PostgreSQL
+        io.to(String(youtuberRoom)).emit('approveProgress', { progress: 80, stage: 'Updating video status in database' });
+
         // Update video status in PostgreSQL
         const updateQuery = `UPDATE videos SET status = 'Approved', updated_at = CURRENT_TIMESTAMP WHERE id = $1`;
         await pool.query(updateQuery, [videoId]);
+
+        io.to(String(youtuberRoom)).emit('approveProgress', { progress: 90, stage: 'Sending notification to editor' });
 
         //Send notification to the editor
         const notificationMessage = `Your video "${video.title}" has been approved and uploaded to YouTube.`;
@@ -191,8 +287,14 @@ router.post('/approve-video', async (req, res) => {
             'video',
         ]);
 
+        // Emit final progress update (100%)
+        io.to(String(youtuberRoom)).emit('approveProgress', { progress: 100, stage: 'Approval process complete' });
 
-        return res.status(200).json({ message: 'Video approved and uploaded successfully.', youtubeVideoId });
+
+        // return res.status(200).json({ message: 'Video approved and uploaded successfully.', youtubeVideoId });
+        setTimeout(() => {
+            return res.status(200).json({ message: 'Video approved and uploaded successfully.', youtubeVideoId });
+        }, 500);
     } catch (error) {
         console.error('Error approving and uploading video:', error);
         return res.status(500).json({ message: 'Internal server error.' });
@@ -200,5 +302,43 @@ router.post('/approve-video', async (req, res) => {
 });
 
 // Route to reject video
+router.post('/reject-video', async (req, res) => {
+    try {
+        const { videoId, workspaceId } = req.body;
+        if (!videoId || !workspaceId) {
+            return res.status(400).json({ message: 'Video ID and Workspace ID are required.' });
+        }
+
+        // Fetch video metadata
+        const videoQuery = `SELECT * FROM videos WHERE id = $1 AND status = 'Pending'`;
+        const videoResult = await pool.query(videoQuery, [videoId]);
+        const video = videoResult.rows[0];
+
+        if (!video) {
+            return res.status(404).json({ message: 'Video not found or already processed.' });
+        }
+
+        const editorId = video.editor_id;
+
+        // Update video status to 'Rejected'
+        const updateQuery = `UPDATE videos SET status = 'Rejected', updated_at = CURRENT_TIMESTAMP WHERE id = $1`;
+        await pool.query(updateQuery, [videoId]);
+
+        // Send notification to the editor
+        const notificationMessage = `Your video "${video.title}" has been rejected.`;
+        const notificationQuery = `
+        INSERT INTO general_notifications (
+          recipient_id, recipient_role, message, notification_type, related_workspace_id, related_entity_id, related_entity_type, expires_at
+        )
+        VALUES ($1, 'editor', $2, 'review_response', $3, $4, 'video', CURRENT_TIMESTAMP + INTERVAL '3 days')
+      `;
+        await pool.query(notificationQuery, [editorId, notificationMessage, workspaceId, videoId]);
+
+        return res.status(200).json({ message: 'Video rejected.' });
+    } catch (error) {
+        console.error('Error rejecting video:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+});
 
 export default router;

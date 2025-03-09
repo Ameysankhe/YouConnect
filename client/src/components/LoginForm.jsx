@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate} from 'react-router-dom';
 import { Snackbar, Alert } from '@mui/material';
+import { AuthContext } from '../App';
 import '../styles/LoginForm.css'
 
 const LoginForm = () => {
@@ -9,19 +10,24 @@ const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [alert, setAlert] = useState({ open: false, type: '', message: '' });
     const handleCloseAlert = () => setAlert({ ...alert, open: false });
+    const { setIsAuthenticated } = useContext(AuthContext);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const checkAuthStatus = async () => {
             try {
                 const response = await axios.get('http://localhost:4000/auth/status', {
-                    withCredentials: true, // Include cookies with the request
+                    withCredentials: true, 
                 });
+                if(response.data.loggedIn) {
+                    setIsAuthenticated(true);
+                }
             } catch (error) {
                 console.error('Error checking authentication status:', error);
             }
         };
         checkAuthStatus();
-    }, []);
+    }, [setIsAuthenticated]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,13 +44,16 @@ const LoginForm = () => {
 
             setEmail('');
             setPassword('');
+            setIsAuthenticated(true);
 
             setTimeout(() => {
                 // Redirect based on the role
                 if (response.data.role === 'youtuber') {
-                    window.location.href = response.data.redirectUrl;
+                    // window.location.href = response.data.redirectUrl;
+                    navigate(response.data.redirectUrl);
                 } else {
-                    window.location.href = response.data.redirectUrl;
+                    // window.location.href = response.data.redirectUrl;
+                    navigate(response.data.redirectUrl);
                 }
             }, 1000);
 
@@ -65,7 +74,7 @@ const LoginForm = () => {
         <>
             <div className="login-form">
                 <form onSubmit={handleSubmit}>
-                    <h1>Login form</h1>
+                    <h4>Login form</h4>
                     <div className="input-box">
                         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder='email' name="email" required />
                     </div>
@@ -89,10 +98,10 @@ const LoginForm = () => {
                     sx={{
                         width: '100%',
                         maxWidth: '600px', 
-                        wordWrap: 'break-word', // Ensure text wraps for long messages
-                        fontSize: '1rem', // Adjust font size if needed
+                        wordWrap: 'break-word', 
+                        fontSize: '1rem', 
                         display: 'flex',
-                        justifyContent: 'center', // Center-align content
+                        justifyContent: 'center', 
                     }}
                 >
                     {alert.message}

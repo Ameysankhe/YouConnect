@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemIcon, ListItemText, Button, Box, Snackbar, Alert, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Menu, MenuItem, Badge, CircularProgress, Collapse } from '@mui/material';
 import { ExitToApp, Lock, LockOpen, Add, CheckCircle, CloudUpload, ListAlt, ExpandLess, ExpandMore, Menu as MenuIcon } from '@mui/icons-material';
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -22,21 +22,21 @@ const WorkspacePage = () => {
     const location = useLocation();
     const [workspace, setWorkspace] = useState(null);
     const [hasAccess, setHasAccess] = useState(false);
-    const [activeSection, setActiveSection] = useState(''); // No default initially
+    const [activeSection, setActiveSection] = useState(''); 
     const [editorEmail, setEditorEmail] = useState('');
-    const [editors, setEditors] = useState([]); // State to hold editors
-    const [userRole, setUserRole] = useState(''); // User's role in the workspace
+    const [editors, setEditors] = useState([]); 
+    const [userRole, setUserRole] = useState('');
     const [notifications, setNotifications] = useState([]);
-    const [unreadCount, setUnreadCount] = useState(0); // Add unread count state
+    const [unreadCount, setUnreadCount] = useState(0);
     const [notificationAnchor, setNotificationAnchor] = useState(null);
-    const [lastSeenNotificationTime, setLastSeenNotificationTime] = useState(null); // Track last seen notification time
+    const [lastSeenNotificationTime, setLastSeenNotificationTime] = useState(null); 
     const [isApproveVideosOpen, setIsApproveVideosOpen] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
     const [drawerOpen, setDrawerOpen] = useState(true);
+    const [accessDenied, setAccessDenied] = useState(false); 
+    const navigate = useNavigate();   
 
     useEffect(() => {
-
-        console.log('Workspace ID from URL:', id);
         const fetchWorkspaceDetails = async () => {
             try {
                 const response = await fetch(`http://localhost:4000/workspace/${id}`, {
@@ -50,7 +50,19 @@ const WorkspacePage = () => {
                         setHasAccess(true);
                     }
                     setUserRole(data.userRole)
-                } else {
+                } else if (response.status === 403) {
+                    setAccessDenied(true);
+                    setTimeout(() => {
+                        if (data.userRole === 'youtuber') {
+                            // window.location.href = '/youtuber/dashboard';
+                            navigate('/youtuber/dashboard');
+                        } else {
+                            // window.location.href = '/editor/dashboard';
+                            navigate('/editor/dashboard');
+                        }
+                    }, 3000);
+                }
+                else {
                     setSnackbar({ open: true, message: 'Failed to fetch workspace details', severity: 'error' });
                 }
             } catch (error) {
@@ -86,7 +98,6 @@ const WorkspacePage = () => {
         const searchParams = new URLSearchParams(location.search);
         if (searchParams.get('success') === 'true') {
             setSnackbar({ open: true, message: 'Access granted successfully!', severity: 'success' });
-            // Remove 'success=true' from the URL
             searchParams.delete('success');
             const newSearch = searchParams.toString();
             const newUrl = newSearch ? `${location.pathname}?${newSearch}` : location.pathname;
@@ -117,7 +128,6 @@ const WorkspacePage = () => {
                 const data = await response.json();
                 if (response.ok) {
                     const validNotifications = data.filter(notification => !isNotificationExpired(notification.created_at));
-                    // setNotifications(data);
                     setNotifications(validNotifications);
 
                     // Get the last seen notification time from localStorage
@@ -128,14 +138,6 @@ const WorkspacePage = () => {
                     const latestNotification = validNotifications.find(
                         (notification) => new Date(notification.created_at).getTime() > parsedLastSeenTime
                     );
-                    // if (latestNotification) {
-                    //     setSnackbar({
-                    //         open: true,
-                    //         message: `New notification: ${latestNotification.message}`,
-                    //         severity: "info",
-                    //     });
-                    // }
-                    // Count unread notifications
                     const unread = validNotifications.filter(notification => new Date(notification.created_at).getTime() > parsedLastSeenTime).length;
                     setUnreadCount(unread);
                 } else {
@@ -149,17 +151,16 @@ const WorkspacePage = () => {
         if (userRole) {
             fetchNotifications();
             const intervalId = setInterval(fetchNotifications, 7200000); // Fetch every 2 hours
-
-            return () => clearInterval(intervalId); // Cleanup on component unmount
+            return () => clearInterval(intervalId);
         }
 
     }, [userRole, id]);
 
     const handleNotificationClick = (event) => {
         if (notificationAnchor) {
-            setNotificationAnchor(null); // Close if already open
+            setNotificationAnchor(null); 
         } else {
-            setNotificationAnchor(event.currentTarget); // Open the dropdown
+            setNotificationAnchor(event.currentTarget);
             markNotificationsAsSeen();
         }
     };
@@ -170,8 +171,7 @@ const WorkspacePage = () => {
             seen: true,
         }));
         setNotifications(updatedNotifications);
-        setUnreadCount(0); // Reset unread count
-        // Update last seen time in state and localStorage
+        setUnreadCount(0); 
         const currentTime = new Date().getTime();
         setLastSeenNotificationTime(currentTime);
         localStorage.setItem('lastSeenNotificationTime', currentTime.toString());
@@ -203,7 +203,7 @@ const WorkspacePage = () => {
     );
 
     const handleGrantAccess = () => {
-        console.log('Redirecting with workspaceId:', id); // Log before redirect
+        console.log('Redirecting with workspaceId:', id); 
         window.location.href = `http://localhost:4000/auth/youtube/login?workspaceId=${id}`;
     };
 
@@ -241,7 +241,7 @@ const WorkspacePage = () => {
             const data = await response.json();
             if (response.ok) {
                 setSnackbar({ open: true, message: 'Request sent successfully!', severity: 'success' });
-                setEditorEmail(''); // Clear the input field
+                setEditorEmail(''); 
             } else {
                 setSnackbar({ open: true, message: data.message || 'Failed to add editor', severity: 'error' });
             }
@@ -331,9 +331,11 @@ const WorkspacePage = () => {
 
             case 'exit':
                 if (userRole === 'youtuber') {
-                    window.location.href = '/youtuber/dashboard';
+                    // window.location.href = '/youtuber/dashboard';
+                    navigate('/youtuber/dashboard');
                 } else {
-                    window.location.href = '/editor/dashboard';
+                    // window.location.href = '/editor/dashboard';
+                    navigate('/editor/dashboard');
                 }
                 return null;
 
@@ -347,6 +349,32 @@ const WorkspacePage = () => {
                 return null;
         }
     };
+
+    if (accessDenied) {
+        return (
+            <Box 
+                sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    height: '100vh',
+                    gap: 2
+                }}
+            >
+                <Typography variant="h4" color="error">
+                    Access Denied
+                </Typography>
+                <Typography variant="h6">
+                    You do not have permission to access this workspace.
+                </Typography>
+                <Typography variant="body1">
+                    Redirecting to dashboard...
+                </Typography>
+                <CircularProgress sx={{ mt: 2 }} />
+            </Box>
+        );
+    }
 
     if (!workspace) {
         return (

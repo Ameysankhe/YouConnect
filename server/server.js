@@ -7,10 +7,11 @@ import pool from './src/config/db.js';
 import cors from 'cors';
 import passport from './src/config/passport.js'
 import authRoutes from './src/routes/auth.js';
-import workspaceRoutes from './src/routes/workspaces.js'; // Import workspace routes
+import workspaceRoutes from './src/routes/workspaces.js';
 import workspaceDetailRoutes from './src/routes/workspaceDetails.js';
 import editorNotificationRoutes from './src/routes/editorNotifications.js';
 import uploadRoutes from './src/routes/upload.js';
+import deleteRoutes from './src/routes/delete.js';
 import { router as youtuberNotificationRoutes } from './src/routes/youtuberNotifications.js';
 import { createServer } from 'http';
 import { Server } from 'socket.io'
@@ -30,15 +31,32 @@ const io = new Server(server, {
   }
 });
 
+const users = new Map();
+
+// Middleware to share `io` with routes
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 // Socket.IO Connection Handler
 io.on('connection', (socket) => {
   console.log(`⚡ User Connected: ${socket.id}`);
 
+  socket.on('register', (userId) => {
+    users.set(userId, socket.id);
+    console.log(`✅ User ${userId} registered with socket ${socket.id}`);
+    socket.join(String(userId));
+    console.log(`✅ User ${userId} mapped to socket ${socket.id}`);
+  });
+
   socket.on('disconnect', () => {
     console.log(`❌ User Disconnected: ${socket.id}`);
+    users.forEach((value, key) => {
+      if (value === socket.id) users.delete(key);
+    });
   });
 });
-
 
 // CORS configuration
 app.use(cors({
@@ -56,7 +74,6 @@ app.use((req, res, next) => {
     next();
   }
 });
-
 
 // Middlewares
 app.options('*', cors());
@@ -91,6 +108,7 @@ app.use('/workspace', workspaceDetailRoutes);
 app.use('/editor', editorNotificationRoutes);
 app.use('/youtuber', youtuberNotificationRoutes);
 app.use('/api', uploadRoutes);
+app.use('/api', deleteRoutes);
 
 
 server.listen(PORT, () => {

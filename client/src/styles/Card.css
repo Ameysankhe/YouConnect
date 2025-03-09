@@ -38,7 +38,6 @@
   font-size: 1em;
 }
 
-/* CardGrid.css */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

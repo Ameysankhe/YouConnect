@@ -6,10 +6,10 @@ const router = express.Router();
 // Route to create a new workspace
 router.post('/create', async (req, res) => {
     const { name, description } = req.body;
-    const userId = req.user.id; // Assuming req.user is set after authentication
+    const userId = req.user.id; 
 
-    if (!name) {
-        return res.status(400).json({ error: 'Workspace name is required.' });
+    if (!name || !description) {
+        return res.status(400).json({ error: 'Both workspace name and description are required.' });
     }
 
     try {
@@ -24,11 +24,12 @@ router.post('/create', async (req, res) => {
         console.error('Error creating workspace:', error);
         res.status(500).json({ error: 'Internal server error.' });
     }
+    
 });
 
 // Route to fetch all workspaces for the logged-in user
 router.get('/', async (req, res) => {
-    const userId = req.user.id; // Assuming req.user is set after authentication
+    const userId = req.user.id; 
 
     try {
         const query = `
@@ -44,8 +45,6 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: 'Internal server error.' });
     }
 });
-
-
 
 
 export default router;

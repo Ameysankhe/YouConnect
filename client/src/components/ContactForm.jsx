@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import '../styles/ContactForm.css'; 
 import Navbar from './NavBar';
+import Footer from './Footer';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -53,7 +54,8 @@ const ContactForm = () => {
 
   return (
     <>
-      <Navbar />
+    <Navbar />
+    <div className='contactForm'>
       <div className="contact-container">
         <div className="contact-details">
           <h2>Get in touch</h2>
@@ -62,7 +64,7 @@ const ContactForm = () => {
             fill out the form below, and we'll get back to you as soon as possible.
           </p>
           <p>
-            📞 +91 9082685211 <br />
+            📞 +91 9699407467 <br />
             ✉️ <a href="mailto:support@youconnect.com">support@youconnect.com</a>
           </p>
         </div>
@@ -112,6 +114,8 @@ const ContactForm = () => {
           {status && <p className="status">{status}</p>}
         </div>
       </div>
+    </div>
+    <Footer />
     </>
   );
 };

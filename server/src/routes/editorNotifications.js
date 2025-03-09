@@ -24,7 +24,7 @@ setInterval(deleteExpiredNotifications, 24 * 60 * 60 * 1000);
 // Route to fetch notifications for an editor on dashboard
 router.get('/notifications', async (req, res) => {
     console.log(req.user.id)
-    const editorId = req.user.id; // Assuming req.user contains the logged-in editor's data
+    const editorId = req.user.id; 
 
     try {
         const query = `
@@ -171,7 +171,7 @@ router.post('/notifications/decline/:notificationId', async (req, res) => {
 // Route to get the workspaces the editor has accepted
 router.get('/workspaces', async (req, res) => {
     console.log('Authenticated user:', req.user);
-    const editorId = req.user.id; // Assuming req.user contains the logged-in editor's data
+    const editorId = req.user.id;
 
     try {
         const query = `

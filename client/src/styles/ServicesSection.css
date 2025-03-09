@@ -4,7 +4,6 @@
   text-align: center;
   padding: 0 20px 50px 20px;
   font-family: "Arial", sans-serif;
-  /* margin-top: 50px; */
 }
 
 .services-content {
@@ -24,22 +23,16 @@
   transition: background-color 0.3s, color 0.3s;
 }
 
-.services-button:hover {
-  background-color: #fff;
-  color: #000;
-}
-
 .services-title {
   font-size: 36px;
   font-weight: bold;
-  margin: 20px 0;
+  margin: 20px  0px 20px 25px
 }
 
 .services-description {
+  font-family: 'Gilroy', sans-serif;
   font-size: 16px;
   color: #ccc;
   word-wrap: break-word;
   text-align: center;
-  width: 500px;
-  /* margin-left: 150px; */
 }

@@ -1,0 +1,173 @@
+.pricing-page {
+    background-color: black;
+    font-family: 'Gilroy', sans-serif;
+    text-align: center;
+    padding: 50px 20px;
+    color: white;
+}
+
+.pricing-page h4 {
+    font-family: 'Gilroy', sans-serif;
+    font-weight: 700;
+    padding-top: 60px;
+    font-size: 2.5rem;
+    margin-top: 50px;
+    margin-bottom: 20px;
+}
+
+.pricing-page p {
+    font-family: 'Gilroy', sans-serif;
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+    color: #ccc;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.toggle {
+    /* margin: 20px 0; */
+    margin: 20px 0 40px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.toggle button {
+    background-color: #1a1a1a;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.toggle button:hover {
+    background-color: #4433d4;
+}
+
+.toggle button.active {
+    background-color: #4433d4;
+}
+
+.pricing-cards {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.pricing-card {
+    background-color: #111;
+    border-radius: 10px;
+    padding: 30px;
+    width: 320px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #333;
+}
+
+.pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+}
+
+.pricing-card h2 {
+    font-family: 'Gilroy', sans-serif;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.pricing-card p {
+    font-family: 'Gilroy', sans-serif;
+    font-size: 0.9rem;
+    color: #bbb;
+    margin-bottom: 20px;
+}
+
+.pricing-card h3 {
+    font-family: 'Gilroy', sans-serif;
+    font-size: 2rem;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.buy-button {
+    background-color: #5a49e8;
+    border: none;
+    color: white;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 1rem;
+    width: 100%;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.buy-button:hover {
+    background-color: #4433d4;
+}
+
+.features {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+    text-align: left;
+}
+
+.features li {
+    font-family: 'Gilroy', sans-serif;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: #ddd;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.features li.available {
+    color: #fff;
+}
+
+.features li.unavailable {
+    color: #888;
+}
+
+.features li s {
+    color: #777;
+    text-decoration: line-through;
+}
+
+.icon-available {
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+.icon-unavailable {
+    color: #fff;
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .pricing-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .pricing-card {
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 20px;
+    }
+
+    .pricing-page h4 {
+        font-size: 2rem;
+        padding-top: 40px;
+    }
+} 

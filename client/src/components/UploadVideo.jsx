@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Typography, TextField, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import axios from 'axios';
+import { WebSocketContext } from '../context/WebSocketProvider';
+import Swal from 'sweetalert2';
 
 const CustomProgressBar = ({ progress }) => (
     <div style={{
@@ -50,10 +52,46 @@ const UploadVideo = () => {
 
     const [videoFile, setVideoFile] = useState(null);
     const [thumbnailFile, setThumbnailFile] = useState(null);
-    const [videoProgress, setVideoProgress] = useState(0);
-    const [thumbnailProgress, setThumbnailProgress] = useState(0);
+    // const [videoProgress, setVideoProgress] = useState(0);
+    // const [thumbnailProgress, setThumbnailProgress] = useState(0);
+    const [overallProgress, setOverallProgress] = useState(0);
     const [videoFileName, setVideoFileName] = useState('');
     const [thumbnailFileName, setThumbnailFileName] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
+
+    const socket = useContext(WebSocketContext);
+
+    // Listen for real-time progress events from the server
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on("videoUploadProgress", (data) => {
+            // setVideoProgress(data.progress);
+            console.log("Video upload progress:", data.progress);
+        });
+
+        socket.on("thumbnailUploadProgress", (data) => {
+            // setThumbnailProgress(data.progress);
+            console.log("Thumbnail upload progress:", data.progress);
+        });
+
+        socket.on("uploadStatus", (data) => {
+            console.log("Overall upload status:", data);
+            setOverallProgress(data.progress);
+            if (data.progress === 100) {
+                setTimeout(() => {
+                    setIsUploading(false);
+                }, 1000); // Small delay to ensure upload is completely finished
+            }
+        });
+
+        return () => {
+            socket.off("videoUploadProgress");
+            socket.off("thumbnailUploadProgress");
+            socket.off("uploadStatus");
+        };
+    }, [socket]);
+
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -90,6 +128,8 @@ const UploadVideo = () => {
             return;
         }
 
+        setIsUploading(true);
+
         const form = new FormData();
         form.append('title', formData.title);
         form.append('description', formData.description);
@@ -100,24 +140,29 @@ const UploadVideo = () => {
         form.append('privacy_status', formData.privacyStatus);
         form.append('video', videoFile);
         form.append('thumbnail', thumbnailFile);
-        form.append('workspace_id', workspace_id); // Use dynamic workspace_id
+        form.append('workspace_id', workspace_id);
 
         try {
             const response = await axios.post('http://localhost:4000/api/upload', form, {
                 headers: { 'Content-Type': 'multipart/form-data' },
                 withCredentials: true,
-                onUploadProgress: (progressEvent) => {
-                    const totalLength = progressEvent.total;
-                    if (totalLength) {
-                        const progress = Math.round((progressEvent.loaded * 100) / totalLength);
-                        setVideoProgress(progress);
-                        setThumbnailProgress(progress);
-                    }
+            });
+            // alert(response.data.message);
+            // Show success SweetAlert
+            Swal.fire({
+                icon: 'success',
+                title: 'Upload Successful!',
+                text: response.data.message,
+                backdrop: false,
+                customClass: {
+                    popup: 'my-custom-popup-class',
+                    title: 'my-custom-title-class',
+                    content: 'my-custom-content-class'
                 }
             });
-            alert(response.data.message);
-            setVideoProgress(0);
-            setThumbnailProgress(0);
+            // setVideoProgress(0);
+            // setThumbnailProgress(0);
+            setOverallProgress(0);
             setFormData({
                 title: '',
                 description: '',
@@ -131,13 +176,25 @@ const UploadVideo = () => {
             setThumbnailFile(null);
             setVideoFileName('');
             setThumbnailFileName('');
+            setIsUploading(false);
         } catch (error) {
             console.error('Error uploading video:', error);
-            alert('Failed to upload video.');
+            // alert('Failed to upload video.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Upload Failed',
+                text: 'Failed to upload video. Please try again.',
+                backdrop: false,
+                customClass: {
+                    popup: 'my-custom-popup-class',
+                    title: 'my-custom-title-class',
+                    content: 'my-custom-content-class'
+                }
+            });
+            setIsUploading(false); 
         }
     };
 
-    // Custom styles for upload sections
     const uploadSectionStyle = {
         display: 'flex',
         alignItems: 'center',
@@ -158,6 +215,7 @@ const UploadVideo = () => {
                     value={formData.title}
                     onChange={handleChange}
                     sx={{ marginBottom: 2 }}
+                    disabled={isUploading}
                 />
 
                 {/* Description */}
@@ -171,6 +229,7 @@ const UploadVideo = () => {
                     value={formData.description}
                     onChange={handleChange}
                     sx={{ marginBottom: 2 }}
+                    disabled={isUploading}
                 />
 
                 {/* Tags */}
@@ -182,6 +241,7 @@ const UploadVideo = () => {
                     value={formData.tags}
                     onChange={handleChange}
                     sx={{ marginBottom: 2 }}
+                    disabled={isUploading}
                 />
 
                 {/* Category */}
@@ -194,6 +254,7 @@ const UploadVideo = () => {
                         label="Category"
                         // defaultValue=""
                         onChange={handleChange}
+                        disabled={isUploading}
                     >
                         <MenuItem value={24}>Entertainment</MenuItem>
                         <MenuItem value={27}>Education</MenuItem>
@@ -210,6 +271,7 @@ const UploadVideo = () => {
                     value={formData.defaultLanguage}
                     onChange={handleChange}
                     sx={{ marginBottom: 2 }}
+                    disabled={isUploading}
                 />
 
                 {/* Default Audio Language */}
@@ -221,6 +283,7 @@ const UploadVideo = () => {
                     value={formData.defaultAudioLanguage}
                     onChange={handleChange}
                     sx={{ marginBottom: 2 }}
+                    disabled={isUploading}
                 />
 
                 {/* Privacy Status */}
@@ -233,6 +296,7 @@ const UploadVideo = () => {
                         // defaultValue="private"
                         value={formData.privacyStatus}
                         onChange={handleChange}
+                        disabled={isUploading}
                     >
                         <MenuItem value="private">Private</MenuItem>
                         <MenuItem value="public">Public</MenuItem>
@@ -246,16 +310,17 @@ const UploadVideo = () => {
                         variant="contained"
                         component="label"
                         sx={{ width: '200px' }}
+                        disabled={isUploading}
                     >
                         Upload Video
-                        <input type="file" hidden name='video' onChange={handleFileChange} />
+                        <input type="file" hidden name='video' onChange={handleFileChange} disabled={isUploading} />
                     </Button>
                     {videoFileName && (
                         <Box sx={{ flex: 1 }}>
                             <Typography variant="body2" gutterBottom>
                                 {videoFileName}
                             </Typography>
-                            <CustomProgressBar progress={videoProgress} />
+                            <CustomProgressBar progress={overallProgress} />
                         </Box>
                     )}
                 </div>
@@ -267,16 +332,16 @@ const UploadVideo = () => {
                         variant="contained"
                         component="label"
                         sx={{ width: '200px' }}
-                    >
+                        disabled={isUploading}>
                         Upload Thumbnail
-                        <input type="file" hidden name='thumbnail' onChange={handleFileChange} />
+                        <input type="file" hidden name='thumbnail' onChange={handleFileChange} disabled={isUploading}/>
                     </Button>
                     {thumbnailFileName && (
                         <Box sx={{ flex: 1 }}>
                             <Typography variant="body2" gutterBottom>
                                 {thumbnailFileName}
                             </Typography>
-                            <CustomProgressBar progress={thumbnailProgress} />
+                            <CustomProgressBar progress={overallProgress} />
                         </Box>
                     )}
                 </div>
@@ -286,8 +351,9 @@ const UploadVideo = () => {
                     type='submit'
                     variant="contained"
                     sx={{ display: 'block' }}
+                    disabled={isUploading}
                 >
-                    Submit
+                     {isUploading ? 'Uploading...' : 'Submit'}
                 </Button>
             </Box>
         </Box>

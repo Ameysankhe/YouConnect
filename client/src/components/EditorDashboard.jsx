@@ -1,28 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Box,
-  Button,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Snackbar,
-  Alert,
-  Badge,
-  Popover,
-  CircularProgress,
-} from "@mui/material";
+import { AppBar, Toolbar, Typography, Box, Button, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, Snackbar, Alert, Badge, Popover, CircularProgress,} from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
+import { AuthContext } from '../App';
 
 const drawerWidth = 240;
 
@@ -39,7 +23,7 @@ const EditorDashboard = () => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
-    severity: "info", // "success", "error", "warning", "info"
+    severity: "info", 
   });
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -47,6 +31,7 @@ const EditorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
+  const { setIsAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
 
   // Fetch user info on component mount
@@ -97,14 +82,14 @@ const EditorDashboard = () => {
     fetchNotifications(); // Fetch notifications initially
     const intervalId = setInterval(fetchNotifications, 7200000); // Fetch every 2 hours
 
-    return () => clearInterval(intervalId); // Cleanup on component unmount
+    return () => clearInterval(intervalId); 
   }, []);
 
   const fetchWorkspaces = async () => {
     try {
       const response = await fetch("http://localhost:4000/editor/workspaces", {
         method: 'GET',
-        credentials: "include", // Include credentials for authenticated requests
+        credentials: "include", 
       });
 
       if (response.ok) {
@@ -121,19 +106,12 @@ const EditorDashboard = () => {
   };
 
   useEffect(() => {
-    fetchWorkspaces(); // Fetch workspaces initially when the component mounts
+    fetchWorkspaces(); 
   }, []);
 
   useEffect(() => {
     if (notifications.length > 0) {
       const latestNotification = notifications[0];
-      // if (latestNotification && !latestNotification.seen) {
-      //   setSnackbar({
-      //     open: true,
-      //     message: `New notification: ${latestNotification.message}`,
-      //     severity: "info",
-      //   });
-      // }
     }
   }, [notifications]);
 
@@ -220,8 +198,10 @@ const EditorDashboard = () => {
           message: data.message,
           severity: "success",
         });
+        setIsAuthenticated(false);
         setTimeout(() => {
-          window.location.href = "/"; // Redirect to the home page
+          // window.location.href = "/"; 
+          navigate("/");
         }, 1000);
       } else {
         setSnackbar({
@@ -318,7 +298,6 @@ const EditorDashboard = () => {
           width: drawerWidth,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: drawerWidth,
             boxSizing: 'border-box',
             position: 'fixed',
             height: '100vh',

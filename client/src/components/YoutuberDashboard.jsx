@@ -1,29 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-    Box,
-    Button,
-    Drawer,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    AppBar,
-    Toolbar,
-    Typography,
-    IconButton,
-    Modal,
-    TextField,
-    Card,
-    CardContent,
-    Menu,
-    MenuItem,
-    Snackbar,
-    Alert,
-    Popover,
-    CircularProgress,
+    Box,Button, Drawer,List, ListItem, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, IconButton, Modal, TextField, Card, CardContent, Menu, MenuItem, Snackbar, Alert, Popover, CircularProgress,
 } from '@mui/material';
 import { AddCircle, Logout, Notifications, AccountCircle, Close, Menu as MenuIcon } from '@mui/icons-material';
-import MoreVertIcon from '@mui/icons-material/MoreVert'; // Three dots icon
+import { AuthContext } from '../App';
+import MoreVertIcon from '@mui/icons-material/MoreVert'; 
 
 const drawerWidth = 240;
 
@@ -34,17 +16,22 @@ const YoutuberDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [openModal, setOpenModal] = useState(false);
     const [username, setUsername] = useState('');
-    const [menuAnchorEl, setMenuAnchorEl] = useState(null); // For Menu anchor
-    const [popoverAnchorEl, setPopoverAnchorEl] = useState(null); // For Popover anchor
-    const [selectedWorkspace, setSelectedWorkspace] = useState(null); // To store the workspace being selected
+    const [menuAnchorEl, setMenuAnchorEl] = useState(null); 
+    const [popoverAnchorEl, setPopoverAnchorEl] = useState(null); 
+    const [selectedWorkspace, setSelectedWorkspace] = useState(null); 
     const [drawerOpen, setDrawerOpen] = useState(true);
-
-    // Snackbar state
+    const { setIsAuthenticated } = useContext(AuthContext);
+    const navigate = useNavigate();
+  
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: '',
         severity: 'info',
     });
+
+    const showSnackbar = (message, severity = 'info') => {
+        setSnackbar({ open: true, message, severity });
+    };
 
     const darkTheme = {
         background: '#000000',
@@ -52,11 +39,6 @@ const YoutuberDashboard = () => {
         primary: '#0000FF',
         text: '#FFFFFF',
         border: '#333333'
-    };
-
-    // Show Snackbar
-    const showSnackbar = (message, severity = 'info') => {
-        setSnackbar({ open: true, message, severity });
     };
 
     // Fetch user info on component mount
@@ -103,7 +85,6 @@ const YoutuberDashboard = () => {
         fetchWorkspaces();
     }, []);
 
-
     // Handle workspace creation
     const handleCreateWorkspace = async (e) => {
         e.preventDefault();
@@ -139,9 +120,11 @@ const YoutuberDashboard = () => {
                 credentials: 'include',
             });
             if (response.ok) {
-                showSnackbar('Logged out successfully', 'success'); // Show success message
+                showSnackbar('Logged out successfully', 'success'); 
+                setIsAuthenticated(false);
                 setTimeout(() => {
-                    window.location.href = '/'; // Redirect after 0.5 seconds
+                    // window.location.href = '/'; 
+                    navigate("/");
                 }, 1000);
             } else {
                 showSnackbar('Logout failed', 'error');
@@ -152,24 +135,24 @@ const YoutuberDashboard = () => {
         }
     };
 
-    // Handle menu click (open/close)
+    // Handle menu click
     const handleMenuClick = (event, workspace) => {
-        setMenuAnchorEl(event.currentTarget); // Open the menu
-        setSelectedWorkspace(workspace); // Set the workspace for which the menu is opened
+        setMenuAnchorEl(event.currentTarget); 
+        setSelectedWorkspace(workspace); 
     };
 
     // Handle menu close
     const handleMenuClose = () => {
-        setMenuAnchorEl(null); // Close the menu
+        setMenuAnchorEl(null); 
     };
 
     // Handle AccountCircle icon click (Popover)
     const handlePopoverOpen = (event) => {
-        setPopoverAnchorEl(event.currentTarget); // Open the popover
+        setPopoverAnchorEl(event.currentTarget); 
     };
 
     const handlePopoverClose = () => {
-        setPopoverAnchorEl(null); // Close the popover
+        setPopoverAnchorEl(null); 
     };
 
     // Handle delete action
@@ -254,7 +237,6 @@ const YoutuberDashboard = () => {
                     width: drawerWidth,
                     flexShrink: 0,
                     '& .MuiDrawer-paper': {
-                        width: drawerWidth,
                         boxSizing: 'border-box',
                         bgcolor: darkTheme.paper,
                         borderRight: `1px solid ${darkTheme.border}`,
@@ -326,7 +308,8 @@ const YoutuberDashboard = () => {
                                                 variant="contained"
                                                 fullWidth
                                                 sx={{ mt: 2,  bgcolor: darkTheme.primary}}
-                                                onClick={() => window.location.href = `/workspace/${workspace.id}`}
+                                                // onClick={() => window.location.href = `/workspace/${workspace.id}`}
+                                                onClick={() => navigate(`/workspace/${workspace.id}`)}
                                             >
                                                 Enter Workspace
                                             </Button>

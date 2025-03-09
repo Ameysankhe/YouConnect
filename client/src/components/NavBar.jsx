@@ -1,27 +1,34 @@
 import React from 'react';
 import '../styles/Navbar.css';
-import logo from '../assets/YouConnect.png'; 
+import logo from '../assets/YouConnect.png';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   return (
     <nav className="navbar">
-      <img src={logo} alt="Logo" className="navbar-logo" />
+      <Link to="/">
+        <img src={logo} alt="Logo" className="navbar-logo" />
+      </Link>
       <ul className="navbar-list">
         <li className="navbar-item">
-          <a href="#home" className="navbar-link">Home</a>
+          <Link to="/" className="navbar-link">Home</Link>
         </li>
         <li className="navbar-item">
-          <a href="#about" className="navbar-link">About Us</a>
+          <Link to="/contact" className="navbar-link">Contact</Link>
         </li>
         <li className="navbar-item">
-          <a href="/contact" className="navbar-link">Contact</a>
+          <Link to="/pricing" className="navbar-link">Pricing</Link>
+        </li>
+        <li className="navbar-item">
+          <Link to="/whatsnew" className="navbar-link">What's New</Link>
         </li>
       </ul>
       <div className="navbar-buttons">
-        <button className="navbar-button">Sign In or Sign Up</button>
+        <Link to="/getstarted" className="navbar-link">Sign in / Sign up</Link>
       </div>
     </nav>
   );
 };
 
 export default Navbar;
+

@@ -15,6 +15,11 @@ router.post('/register', async (req, res) => {
   const { username, email, password, confirmPassword, role } = req.body;
 
   try {
+
+    if (!username || !email || !password || !confirmPassword || !role) {
+      return res.status(400).json({ message: 'All field are required.' });
+    }
+
     // Check if passwords match
     if (password !== confirmPassword) {
       return res.status(400).json({ message: 'Passwords do not match' });
@@ -87,6 +92,10 @@ router.post('/logout', (req, res) => {
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
 
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required.' });
+  }
+
   try {
     // Check if the user exists in the database
     const userQuery = 'SELECT * FROM users WHERE email = $1';
@@ -115,8 +124,8 @@ router.post('/forgot-password', async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
-        user: 'ameysankhe18@gmail.com', // Your email
-        pass: 'zlqk kgtj jggb kbjc'   // Your email password
+        user: 'ameysankhe18@gmail.com', 
+        pass: 'zlqk kgtj jggb kbjc'  
       }
     });
 
