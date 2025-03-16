@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Snackbar, Alert } from '@mui/material';
+import Navbar from './NavBar';
+import Footer from './Footer';
+import '../styles/ForgotPassword.css';
 
 function ForgotPassword() {
     const [email, setEmail] = useState('');
@@ -28,42 +31,50 @@ function ForgotPassword() {
     };
 
     return (
-        <div>
-            <form onSubmit={handleForgotPassword}>
-                <h1>Forgot Password</h1>
-                <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    name='email'
-                    required
-                /><br /><br />
-                <button type="submit">Send Reset Link</button>
-            </form>
-            {/* Snackbar for alerts */}
-            <Snackbar
-                open={alert.open}
-                autoHideDuration={6000}
-                onClose={handleCloseAlert}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-            >
-                <Alert
-                    onClose={handleCloseAlert}
-                    severity={alert.type}
-                    sx={{
-                        width: '100%',
-                        maxWidth: '600px',
-                        wordWrap: 'break-word',
-                        fontSize: '1rem',
-                        display: 'flex',
-                        justifyContent: 'center',
-                    }}
-                >
-                    {alert.message}
-                </Alert>
-            </Snackbar>
-        </div>
+        <>
+            <Navbar />
+            <div className="forgot-password-container">
+                <div className='forgot-password-form'>
+                    <form onSubmit={handleForgotPassword}>
+                        <h4>Forgot Password</h4>
+                        <div className='forgot-password-input-box'>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Enter your email"
+                                name='email'
+                                required
+                            />
+                        </div>
+                        <button className='forgot-password-submit-button' type="submit">Send Reset Link</button>
+                    </form>
+                    {/* Snackbar for alerts */}
+                    <Snackbar
+                        open={alert.open}
+                        autoHideDuration={6000}
+                        onClose={handleCloseAlert}
+                        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                    >
+                        <Alert
+                            onClose={handleCloseAlert}
+                            severity={alert.type}
+                            sx={{
+                                width: '100%',
+                                maxWidth: '600px',
+                                wordWrap: 'break-word',
+                                fontSize: '1rem',
+                                display: 'flex',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            {alert.message}
+                        </Alert>
+                    </Snackbar>
+                </div>
+            </div>
+            <Footer />
+        </>
     );
 }
 

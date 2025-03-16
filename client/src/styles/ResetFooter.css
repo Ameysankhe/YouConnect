@@ -1,0 +1,22 @@
+.reset-footer {
+    background-color: #000000;
+    padding: 20px 0;
+    color: #fff;
+    text-align: center;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    border-top: 1px solid #333;
+}
+
+.reset-footer-container {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 50px;
+}
+
+.reset-footer p {
+    margin: 0;
+    font-size: 14px;
+    color: #bbb;
+}

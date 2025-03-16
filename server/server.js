@@ -12,6 +12,7 @@ import workspaceDetailRoutes from './src/routes/workspaceDetails.js';
 import editorNotificationRoutes from './src/routes/editorNotifications.js';
 import uploadRoutes from './src/routes/upload.js';
 import deleteRoutes from './src/routes/delete.js';
+import chatRoutes from './src/routes/chat.js'
 import { router as youtuberNotificationRoutes } from './src/routes/youtuberNotifications.js';
 import { createServer } from 'http';
 import { Server } from 'socket.io'
@@ -109,6 +110,7 @@ app.use('/editor', editorNotificationRoutes);
 app.use('/youtuber', youtuberNotificationRoutes);
 app.use('/api', uploadRoutes);
 app.use('/api', deleteRoutes);
+app.use('/chat', chatRoutes)
 
 
 server.listen(PORT, () => {

@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Box,Button, Drawer,List, ListItem, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, IconButton, Modal, TextField, Card, CardContent, Menu, MenuItem, Snackbar, Alert, Popover, CircularProgress,
+    Box, Button, Drawer, List, ListItem, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, IconButton, Modal, TextField, Card, CardContent, Menu, MenuItem, Snackbar, Alert, Popover, CircularProgress,
 } from '@mui/material';
 import { AddCircle, Logout, Notifications, AccountCircle, Close, Menu as MenuIcon } from '@mui/icons-material';
 import { AuthContext } from '../App';
-import MoreVertIcon from '@mui/icons-material/MoreVert'; 
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 const drawerWidth = 240;
 
@@ -16,13 +16,13 @@ const YoutuberDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [openModal, setOpenModal] = useState(false);
     const [username, setUsername] = useState('');
-    const [menuAnchorEl, setMenuAnchorEl] = useState(null); 
-    const [popoverAnchorEl, setPopoverAnchorEl] = useState(null); 
-    const [selectedWorkspace, setSelectedWorkspace] = useState(null); 
+    const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+    const [popoverAnchorEl, setPopoverAnchorEl] = useState(null);
+    const [selectedWorkspace, setSelectedWorkspace] = useState(null);
     const [drawerOpen, setDrawerOpen] = useState(true);
     const { setIsAuthenticated } = useContext(AuthContext);
     const navigate = useNavigate();
-  
+
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: '',
@@ -34,11 +34,11 @@ const YoutuberDashboard = () => {
     };
 
     const darkTheme = {
-        background: '#000000',
-        paper: '#111111',
-        primary: '#0000FF',
-        text: '#FFFFFF',
-        border: '#333333'
+        background: '#000000', //black
+        paper: '#111111', // very dark grey
+        primary: '#5050ff', // vibrant shade of blue
+        text: '#FFFFFF', // white
+        border: '#333333' // dark grey
     };
 
     // Fetch user info on component mount
@@ -120,12 +120,13 @@ const YoutuberDashboard = () => {
                 credentials: 'include',
             });
             if (response.ok) {
-                showSnackbar('Logged out successfully', 'success'); 
+                showSnackbar('Logged out successfully', 'success');
                 setIsAuthenticated(false);
-                setTimeout(() => {
-                    // window.location.href = '/'; 
-                    navigate("/");
-                }, 1000);
+                // setTimeout(() => {
+                //     // window.location.href = '/'; 
+                //     navigate("/");
+                // }, 1000);
+                navigate("/");
             } else {
                 showSnackbar('Logout failed', 'error');
             }
@@ -137,22 +138,22 @@ const YoutuberDashboard = () => {
 
     // Handle menu click
     const handleMenuClick = (event, workspace) => {
-        setMenuAnchorEl(event.currentTarget); 
-        setSelectedWorkspace(workspace); 
+        setMenuAnchorEl(event.currentTarget);
+        setSelectedWorkspace(workspace);
     };
 
     // Handle menu close
     const handleMenuClose = () => {
-        setMenuAnchorEl(null); 
+        setMenuAnchorEl(null);
     };
 
     // Handle AccountCircle icon click (Popover)
     const handlePopoverOpen = (event) => {
-        setPopoverAnchorEl(event.currentTarget); 
+        setPopoverAnchorEl(event.currentTarget);
     };
 
     const handlePopoverClose = () => {
-        setPopoverAnchorEl(null); 
+        setPopoverAnchorEl(null);
     };
 
     // Handle delete action
@@ -262,7 +263,7 @@ const YoutuberDashboard = () => {
                     <Box sx={{ flexGrow: 1 }} />
                     <List>
                         <ListItem button onClick={handleLogout}>
-                            <ListItemIcon><Logout  sx={{ color: darkTheme.text }} /></ListItemIcon>
+                            <ListItemIcon><Logout sx={{ color: darkTheme.text }} /></ListItemIcon>
                             <ListItemText primary="Logout" />
                         </ListItem>
                     </List>
@@ -276,17 +277,17 @@ const YoutuberDashboard = () => {
                 marginTop: 8,
                 transition: 'margin-left 0.2s',
                 marginLeft: drawerOpen ? 0 : `-${drawerWidth}px`,
-                bgcolor: darkTheme.background
+                // bgcolor: darkTheme.background
             }}>
                 {loading ? (
                     <Box textAlign="center" mt={5}>
-                        <CircularProgress sx={{ color: darkTheme.primary }}/>
+                        <CircularProgress sx={{ color: darkTheme.primary }} />
                     </Box>
                 ) : (
                     <>
                         {workspaces.length === 0 ? (
                             <Box textAlign="center" mt={5}>
-                                <Typography variant="h5" sx={{color: darkTheme.text}}>No Workspace Created</Typography>
+                                <Typography variant="h5" sx={{ color: darkTheme.text }}>No Workspace Created</Typography>
                                 <IconButton onClick={() => setOpenModal(true)} sx={{ mt: 2 }}>
                                     <AddCircle sx={{ fontSize: 50 }} />
                                 </IconButton>
@@ -294,20 +295,20 @@ const YoutuberDashboard = () => {
                         ) : (
                             <Box display="flex" flexWrap="wrap" gap="20px">
                                 {workspaces.map((workspace) => (
-                                    <Card key={workspace.id} sx={{ width: 250, bgcolor: darkTheme.paper,  border: `1px solid ${darkTheme.border}`,  borderRadius: 2, position: 'relative' }}>
+                                    <Card key={workspace.id} sx={{ width: 250, bgcolor: darkTheme.paper, border: `1px solid ${darkTheme.border}`, borderRadius: 2, position: 'relative' }}>
                                         <IconButton
                                             sx={{ position: 'absolute', top: 8, right: 8 }}
                                             onClick={(event) => handleMenuClick(event, workspace)} // Open menu when clicked
                                         >
-                                            <MoreVertIcon sx={{color: darkTheme.text}}/>
+                                            <MoreVertIcon sx={{ color: darkTheme.text }} />
                                         </IconButton>
                                         <CardContent>
-                                            <Typography variant="h6" sx={{  borderBottom: `2px solid ${darkTheme.text}`, paddingBottom: '4px', color: darkTheme.text }}>{workspace.name}</Typography>
-                                            <Typography variant="body2" sx={{ marginBottom: '16px', marginTop: '10px', color: 'rgba(255,255,255,0.7)',}}>{workspace.description}</Typography>
+                                            <Typography variant="h6" sx={{ borderBottom: `2px solid ${darkTheme.text}`, paddingBottom: '4px', color: darkTheme.text }}>{workspace.name}</Typography>
+                                            <Typography variant="body2" sx={{ marginBottom: '16px', marginTop: '10px', color: 'rgba(255,255,255,0.7)', }}>{workspace.description}</Typography>
                                             <Button
                                                 variant="contained"
                                                 fullWidth
-                                                sx={{ mt: 2,  bgcolor: darkTheme.primary}}
+                                                sx={{ mt: 2, bgcolor: darkTheme.primary }}
                                                 // onClick={() => window.location.href = `/workspace/${workspace.id}`}
                                                 onClick={() => navigate(`/workspace/${workspace.id}`)}
                                             >
@@ -336,7 +337,7 @@ const YoutuberDashboard = () => {
                         border: `1px solid ${darkTheme.border}`,
                         boxShadow: 24,
                         p: 4,
-                        borderRadius: 2,    
+                        borderRadius: 2,
                         width: 400,
                         color: darkTheme.text
                     }}
@@ -344,7 +345,7 @@ const YoutuberDashboard = () => {
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                         <Typography variant="h6">Create Workspace</Typography>
                         <IconButton onClick={() => setOpenModal(false)}>
-                            <Close sx={{color: darkTheme.text}}/>
+                            <Close sx={{ color: darkTheme.text }} />
                         </IconButton>
                     </Box>
                     <TextField
@@ -360,6 +361,9 @@ const YoutuberDashboard = () => {
                                     borderColor: darkTheme.border,
                                 },
                                 '&:hover fieldset': {
+                                    borderColor: darkTheme.primary,
+                                },
+                                '&.Mui-focused fieldset': {
                                     borderColor: darkTheme.primary,
                                 },
                             },
@@ -386,6 +390,9 @@ const YoutuberDashboard = () => {
                                 '&:hover fieldset': {
                                     borderColor: darkTheme.primary,
                                 },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: darkTheme.primary,
+                                },
                             },
                             '& .MuiInputLabel-root': {
                                 color: 'rgba(255,255,255,0.7)',
@@ -393,7 +400,7 @@ const YoutuberDashboard = () => {
                         }}
                         required
                     />
-                    <Button type="submit" variant="contained" fullWidth sx={{ mt: 2,  bgcolor: darkTheme.primary}}>
+                    <Button type="submit" variant="contained" fullWidth sx={{ mt: 2, bgcolor: darkTheme.primary }}>
                         Submit
                     </Button>
                 </Box>

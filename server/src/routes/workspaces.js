@@ -46,5 +46,19 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Route to fetch current user details (using the workspace ID for route structure)
+router.get('/:id/details', async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+      // Return the complete currentUser data from req.user
+      return res.status(200).json({ currentUser: req.user });
+    } catch (error) {
+      console.error('Error fetching current user details:', error);
+      return res.status(500).json({ error: 'An error occurred while fetching user details.' });
+    }
+  });
+  
 
 export default router;

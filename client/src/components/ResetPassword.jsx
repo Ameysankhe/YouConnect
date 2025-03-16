@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { Snackbar, Alert } from '@mui/material';
+import ResetNavbar from './ResetNavbar'
+import ResetFooter from './ResetFooter';
+import '../styles/ResetPassword.css';
 
 function ResetPassword() {
     const [password, setPassword] = useState('');
@@ -66,24 +69,31 @@ function ResetPassword() {
     };
 
     return (
-        <div>
+        <>
+        <ResetNavbar />
+        <div className="reset-password-container">
+            <div  className="reset-password-form">
             <form onSubmit={handleResetPassword}>
-                <h1>Reset Password</h1>
+                <h4>Reset Password</h4>
+                <div className="reset-password-input-box">
                 <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="New password"
                     required
-                /><br /><br />
+                />
+                </div>
+                <div className="reset-password-input-box">
                 <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm new password"
                     required
-                /><br /><br />
-                <button type="submit">Reset Password</button><br /><br />
+                />
+                </div>
+                <button className="reset-password-submit-button" type="submit">Reset Password</button><br /><br />
             </form>
             {/* Snackbar for alerts */}
             <Snackbar
@@ -107,7 +117,10 @@ function ResetPassword() {
                     {alert.message}
                 </Alert>
             </Snackbar>
+            </div>
         </div>
+        <ResetFooter />
+        </>
     );
 }
 

@@ -1,0 +1,22 @@
+.reset-navbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 1rem 2rem;
+    background-color: #000000;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    border-bottom: 1px solid #333333; 
+}
+
+.reset-navbar-logo {
+    height: 50px;
+    cursor: default;
+    display: flex;
+    align-items: center; 
+  }

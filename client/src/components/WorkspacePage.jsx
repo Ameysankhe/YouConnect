@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemIcon, ListItemText, Button, Box, Snackbar, Alert, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Menu, MenuItem, Badge, CircularProgress, Collapse } from '@mui/material';
 import { ExitToApp, Lock, LockOpen, Add, CheckCircle, CloudUpload, ListAlt, ExpandLess, ExpandMore, Menu as MenuIcon } from '@mui/icons-material';
+import ChatIcon from '@mui/icons-material/Chat';
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import UploadVideo from './UploadVideo';
 import ListVideos from './ListVideos';
 import ApproveVideos from './ApproveVideos';
+import ChatRoom from './ChatRoom';
 
 const drawerWidth = 240;
 
@@ -22,19 +25,50 @@ const WorkspacePage = () => {
     const location = useLocation();
     const [workspace, setWorkspace] = useState(null);
     const [hasAccess, setHasAccess] = useState(false);
-    const [activeSection, setActiveSection] = useState(''); 
+    const [activeSection, setActiveSection] = useState('');
     const [editorEmail, setEditorEmail] = useState('');
-    const [editors, setEditors] = useState([]); 
+    const [editors, setEditors] = useState([]);
     const [userRole, setUserRole] = useState('');
+    const [currentUser, setCurrentUser] = useState(null);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [notificationAnchor, setNotificationAnchor] = useState(null);
-    const [lastSeenNotificationTime, setLastSeenNotificationTime] = useState(null); 
+    const [lastSeenNotificationTime, setLastSeenNotificationTime] = useState(null);
     const [isApproveVideosOpen, setIsApproveVideosOpen] = useState(false);
+    const [isChatRoomOpen, setIsChatRoomOpen] = useState(false);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
     const [drawerOpen, setDrawerOpen] = useState(true);
-    const [accessDenied, setAccessDenied] = useState(false); 
-    const navigate = useNavigate();   
+    const [accessDenied, setAccessDenied] = useState(false);
+    const navigate = useNavigate();
+
+    const darkTheme = {
+        background: '#000000', //black
+        paper: '#111111', // very dark grey
+        primary: '#5050ff', // vibrant shade of blue
+        text: '#FFFFFF', // white
+        border: '#333333' // dark grey
+    };
+
+    const theme = createTheme({
+        components: {
+            MuiTableCell: {
+                styleOverrides: {
+                    root: {
+                        color: darkTheme.text,
+                        borderColor: darkTheme.border
+                    }
+                }
+            },
+            MuiTableContainer: {
+                styleOverrides: {
+                    root: {
+                        border: `1px solid ${darkTheme.border}`,
+                        borderRadius: 4
+                    }
+                }
+            }
+        }
+    });
 
     useEffect(() => {
         const fetchWorkspaceDetails = async () => {
@@ -91,8 +125,26 @@ const WorkspacePage = () => {
             }
         };
 
+        const fetchCurrentUser = async () => {
+            try {
+                const response = await fetch(`http://localhost:4000/workspaces/${id}/details`, {
+                    credentials: 'include',
+                });
+                const data = await response.json();
+                console.log('Fetched current user details:', data);
+                if (response.ok) {
+                    setCurrentUser(data.currentUser);
+                } else {
+                    console.error('Failed to fetch current user details');
+                }
+            } catch (error) {
+                console.error('Error fetching current user details:', error);
+            }
+        };
+
         fetchWorkspaceDetails();
         fetchEditors();
+        fetchCurrentUser();
 
         // Check for success state in the URL
         const searchParams = new URLSearchParams(location.search);
@@ -158,7 +210,7 @@ const WorkspacePage = () => {
 
     const handleNotificationClick = (event) => {
         if (notificationAnchor) {
-            setNotificationAnchor(null); 
+            setNotificationAnchor(null);
         } else {
             setNotificationAnchor(event.currentTarget);
             markNotificationsAsSeen();
@@ -171,7 +223,7 @@ const WorkspacePage = () => {
             seen: true,
         }));
         setNotifications(updatedNotifications);
-        setUnreadCount(0); 
+        setUnreadCount(0);
         const currentTime = new Date().getTime();
         setLastSeenNotificationTime(currentTime);
         localStorage.setItem('lastSeenNotificationTime', currentTime.toString());
@@ -203,7 +255,7 @@ const WorkspacePage = () => {
     );
 
     const handleGrantAccess = () => {
-        console.log('Redirecting with workspaceId:', id); 
+        console.log('Redirecting with workspaceId:', id);
         window.location.href = `http://localhost:4000/auth/youtube/login?workspaceId=${id}`;
     };
 
@@ -241,7 +293,7 @@ const WorkspacePage = () => {
             const data = await response.json();
             if (response.ok) {
                 setSnackbar({ open: true, message: 'Request sent successfully!', severity: 'success' });
-                setEditorEmail(''); 
+                setEditorEmail('');
             } else {
                 setSnackbar({ open: true, message: data.message || 'Failed to add editor', severity: 'error' });
             }
@@ -256,14 +308,14 @@ const WorkspacePage = () => {
             case 'grantAccess':
                 return userRole === 'youtuber' ? (
                     <Box>
-                        <Typography variant="h5">
+                        <Typography variant="h5" sx={{ color: darkTheme.text }}>
                             {hasAccess ? "Revoke Access as you wish!" : "Grant Access to proceed!"}
                         </Typography>
 
                         <Button
                             variant="contained"
                             onClick={hasAccess ? handleRevokeAccess : handleGrantAccess}
-                            sx={{ marginTop: 2 }}
+                            sx={{ marginTop: 2, bgcolor: darkTheme.primary }}
                         >
                             {hasAccess ? 'Revoke Access' : 'Grant Access'}
                         </Button>
@@ -272,50 +324,78 @@ const WorkspacePage = () => {
             case 'addEditor':
                 return userRole === 'youtuber' ? (
                     <Box>
-                        <Typography variant="h5">Add an Editor to {workspace.name}</Typography>
+                        <Typography variant="h5" sx={{ color: darkTheme.text }}>Add an Editor to {workspace.name}</Typography>
                         <Box sx={{ display: 'flex', flexDirection: 'column', marginTop: 2 }}>
                             <TextField
                                 label="Editor Email"
                                 variant="outlined"
                                 value={editorEmail}
                                 onChange={(e) => setEditorEmail(e.target.value)}
-                                sx={{ marginBottom: 2, width: '50%' }}
+                                sx={{
+                                    marginBottom: 2, width: '50%', '& .MuiOutlinedInput-root': {
+                                        color: darkTheme.text, // This sets the input text color
+                                        '& fieldset': {
+                                            borderColor: darkTheme.border,
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: darkTheme.primary,
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: darkTheme.primary,
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: darkTheme.text, // This sets the label color
+                                    },
+                                    '& .MuiInputBase-input::placeholder': {
+                                        color: 'rgba(255, 255, 255, 0.7)', // This sets the placeholder color
+                                        opacity: 1,
+                                    },
+                                    '& .MuiInputLabel-root.Mui-focused': {
+                                        color: darkTheme.text, // Color when focused and floating
+                                    },
+                                    '& .MuiInputLabel-shrink': {
+                                        color: darkTheme.text, // Color when shrunk (floating)
+                                    },
+                                }}
                             />
                             <Button
                                 variant="contained"
                                 onClick={handleEditorSubmit}
-                                sx={{ marginTop: 2, width: '50%' }}
+                                sx={{ marginTop: 2, width: '50%', bgcolor: darkTheme.primary }}
                             >
                                 Add Editor
                             </Button>
                         </Box>
 
                         {/* Display Editors in Table */}
-                        <Typography variant="h6" sx={{ marginTop: 3 }}>Editors List</Typography>
-                        <TableContainer component={Paper}>
-                            <Table sx={{ minWidth: 650 }} aria-label="editor table">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Sr.No.</TableCell>
-                                        <TableCell>Email</TableCell>
-                                        <TableCell>Status</TableCell>
-                                        <TableCell>Action</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {editors.map((editor, index) => (
-                                        <TableRow key={editor.id}>
-                                            <TableCell>{index + 1}</TableCell>
-                                            <TableCell>{editor.email}</TableCell>
-                                            <TableCell>{editor.status}</TableCell>
-                                            <TableCell>
-                                                <Button variant="contained" color="error" size="small">Delete</Button>
-                                            </TableCell>
+                        <Typography variant="h6" sx={{ marginTop: 3, color: darkTheme.text }}>Editors List</Typography>
+                        <ThemeProvider theme={theme}>
+                            <TableContainer component={Paper}>
+                                <Table sx={{ minWidth: 650, bgcolor: darkTheme.paper, }} aria-label="editor table">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Sr.No.</TableCell>
+                                            <TableCell>Email</TableCell>
+                                            <TableCell>Status</TableCell>
+                                            <TableCell>Action</TableCell>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                                    </TableHead>
+                                    <TableBody>
+                                        {editors.map((editor, index) => (
+                                            <TableRow key={editor.id}>
+                                                <TableCell>{index + 1}</TableCell>
+                                                <TableCell>{editor.email}</TableCell>
+                                                <TableCell>{editor.status}</TableCell>
+                                                <TableCell>
+                                                    <Button variant="contained" color="error" size="small">Delete</Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </ThemeProvider>
 
                     </Box>
                 ) : null;
@@ -328,6 +408,16 @@ const WorkspacePage = () => {
             case 'listVideos':
                 return userRole !== 'youtuber' ? (<ListVideos />) : null;
 
+            case 'chat':
+                // For editor chatting with youtuber
+                return (
+                    <ChatRoom
+                        partnerName={workspace?.owner_name || "Youtuber"}
+                        senderId={currentUser?.id}
+                        receiverId={workspace?.owner_id}
+                        workspaceId={workspace?.id}
+                    />
+                );
 
             case 'exit':
                 if (userRole === 'youtuber') {
@@ -346,18 +436,31 @@ const WorkspacePage = () => {
                         <ApproveVideos editorId={editorId} />
                     ) : null;
                 }
+                if (activeSection.startsWith('chat-')) {
+                    const editorId = activeSection.split('-')[1];
+                    const partner = editors.find(editor => editor.id.toString() === editorId);
+                    const partnerName = partner ? partner.email : "Editor";
+                    return (
+                        <ChatRoom
+                            partnerName={partnerName}
+                            senderId={currentUser?.id}
+                            receiverId={partner ? partner.id : null}
+                            workspaceId={workspace?.id}
+                        />
+                    );
+                }
                 return null;
         }
     };
 
     if (accessDenied) {
         return (
-            <Box 
-                sx={{ 
-                    display: 'flex', 
+            <Box
+                sx={{
+                    display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'center', 
-                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    alignItems: 'center',
                     height: '100vh',
                     gap: 2
                 }}
@@ -371,7 +474,7 @@ const WorkspacePage = () => {
                 <Typography variant="body1">
                     Redirecting to dashboard...
                 </Typography>
-                <CircularProgress sx={{ mt: 2 }} />
+                <CircularProgress sx={{ mt: 2, color: darkTheme.primary }} />
             </Box>
         );
     }
@@ -379,14 +482,17 @@ const WorkspacePage = () => {
     if (!workspace) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <CircularProgress />
+                <CircularProgress sx={{ color: darkTheme.primary }} />
             </div>
         );
     }
 
     return (
         <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-            <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+            <AppBar position="fixed" sx={{
+                zIndex: (theme) => theme.zIndex.drawer + 1, bgcolor: darkTheme.paper,
+                borderBottom: `1px solid ${darkTheme.border}`,
+            }}>
                 <Toolbar>
                     <IconButton
                         color="inherit"
@@ -419,6 +525,9 @@ const WorkspacePage = () => {
                     flexShrink: 0,
                     '& .MuiDrawer-paper': {
                         boxSizing: 'border-box',
+                        bgcolor: darkTheme.paper,
+                        borderRight: `1px solid ${darkTheme.border}`,
+                        color: darkTheme.text,
                         position: 'fixed',
                         height: '100vh',
                         transition: 'width 0.2s',
@@ -430,7 +539,7 @@ const WorkspacePage = () => {
                 open={drawerOpen}
             >
                 <Toolbar />
-                <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', }}>
+                <Box sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)' }}>
                     <List>
                         {userRole === 'youtuber' && (
                             <>
@@ -443,7 +552,7 @@ const WorkspacePage = () => {
                                     }}
                                 >
                                     <ListItemIcon>
-                                        {hasAccess ? <Lock /> : <LockOpen />}
+                                        {hasAccess ? <Lock sx={{ color: darkTheme.primary }} /> : <LockOpen sx={{ color: darkTheme.primary }} />}
                                     </ListItemIcon>
 
                                     <ListItemText primary={hasAccess ? "Revoke Access" : "Grant Access"} />
@@ -457,7 +566,7 @@ const WorkspacePage = () => {
                                     }}
                                 >
                                     <ListItemIcon>
-                                        <Add />
+                                        <Add sx={{ color: darkTheme.primary }} />
                                     </ListItemIcon>
                                     <ListItemText primary="Add Editor" />
                                 </ListItem>
@@ -469,12 +578,12 @@ const WorkspacePage = () => {
                                     }}
                                 >
                                     <ListItemIcon>
-                                        <CheckCircle />
+                                        <CheckCircle sx={{ color: darkTheme.primary }} />
                                     </ListItemIcon>
                                     <ListItemText primary="Approve Videos" />
 
                                     <IconButton size="small">
-                                        {isApproveVideosOpen ? <ExpandLess /> : <ExpandMore />}
+                                        {isApproveVideosOpen ? <ExpandLess sx={{ color: darkTheme.text }} /> : <ExpandMore sx={{ color: darkTheme.text }} />}
                                     </IconButton>
 
                                 </ListItem>
@@ -503,9 +612,45 @@ const WorkspacePage = () => {
                                                 <ListItemText
                                                     primary="No editors present"
                                                     sx={{
-                                                        color: 'text.secondary',
+                                                        color: darkTheme.text,
                                                     }}
                                                 />
+                                            </ListItem>
+                                        )}
+                                    </List>
+                                </Collapse>
+                                {/* Chat Room section for youtuber */}
+                                <ListItem
+                                    button
+                                    onClick={() => setIsChatRoomOpen(!isChatRoomOpen)}
+                                >
+                                    <ListItemIcon>
+                                        <ChatIcon sx={{ color: darkTheme.primary }} />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Chat Room" />
+                                    <IconButton size="small">
+                                        {isChatRoomOpen ? <ExpandLess sx={{ color: darkTheme.text }} /> : <ExpandMore sx={{ color: darkTheme.text }} />}
+                                    </IconButton>
+                                </ListItem>
+                                <Collapse in={isChatRoomOpen} timeout="auto" unmountOnExit>
+                                    <List component="div" disablePadding>
+                                        {editors.length > 0 ? (
+                                            editors.map((editor) => (
+                                                <ListItem
+                                                    key={editor.id}
+                                                    button
+                                                    sx={{
+                                                        pl: 4,
+                                                        backgroundColor: activeSection === `chat-${editor.id}` ? 'rgba(0, 0, 255, 0.1)' : 'transparent',
+                                                    }}
+                                                    onClick={() => setActiveSection(`chat-${editor.id}`)}
+                                                >
+                                                    <ListItemText primary={editor.email} />
+                                                </ListItem>
+                                            ))
+                                        ) : (
+                                            <ListItem sx={{ pl: 4 }}>
+                                                <ListItemText primary="No editors available" sx={{ color: darkTheme.text }} />
                                             </ListItem>
                                         )}
                                     </List>
@@ -523,7 +668,7 @@ const WorkspacePage = () => {
                                     }}
                                 >
                                     <ListItemIcon>
-                                        <CloudUpload />
+                                        <CloudUpload sx={{ color: darkTheme.primary }} />
                                     </ListItemIcon>
                                     <ListItemText primary="Upload Video" />
                                 </ListItem>
@@ -536,9 +681,23 @@ const WorkspacePage = () => {
                                     }}
                                 >
                                     <ListItemIcon>
-                                        <ListAlt />
+                                        <ListAlt sx={{ color: darkTheme.primary }} />
                                     </ListItemIcon>
                                     <ListItemText primary="List of Videos" />
+                                </ListItem>
+                                {/* Chat Room for editor */}
+                                <ListItem
+                                    button
+                                    selected={activeSection === 'chat'}
+                                    onClick={() => setActiveSection('chat')}
+                                    sx={{
+                                        backgroundColor: activeSection === 'chat' ? 'rgba(0, 0, 255, 0.1)' : 'transparent',
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <ChatIcon sx={{ color: darkTheme.primary }} />
+                                    </ListItemIcon>
+                                    <ListItemText primary="Chat Room" />
                                 </ListItem>
                             </>
                         )}
@@ -551,7 +710,7 @@ const WorkspacePage = () => {
                             onClick={() => setActiveSection('exit')}
                         >
                             <ListItemIcon>
-                                <ExitToApp />
+                                <ExitToApp sx={{ color: darkTheme.text }} />
                             </ListItemIcon>
                             <ListItemText primary="Exit" />
                         </ListItem>
@@ -562,7 +721,7 @@ const WorkspacePage = () => {
                 component="main"
                 sx={{
                     flexGrow: 1,
-                    bgcolor: 'background.default',
+                    bgcolor: darkTheme.background,
                     p: 3,
                     marginTop: 8,
                     transition: 'margin-left 0.2s',

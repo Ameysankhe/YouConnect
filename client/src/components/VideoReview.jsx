@@ -9,7 +9,7 @@ import {
   Typography,
   LinearProgress,
   Grid,
-  IconButton
+  IconButton,
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import axios from 'axios';
@@ -35,6 +35,14 @@ const VideoReview = ({ video, onBackToList }) => {
   const [duration, setDuration] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const socket = useContext(WebSocketContext);
+
+  const darkTheme = {
+    background: '#000000', //black
+    paper: '#111111', // very dark grey
+    primary: '#5050ff', // vibrant shade of blue
+    text: '#FFFFFF', // white
+    border: '#333333' // dark grey
+  };
 
   useEffect(() => {
     if (video) {
@@ -140,9 +148,9 @@ const VideoReview = ({ video, onBackToList }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', gap: 3, p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', gap: 3, p: 3, bgcolor: '#111111', border: `1px solid ${darkTheme.border}`, minHeight: '100vh' }}>
       {/* Left Side - Form */}
-      <Card sx={{ width: '33%', height: 'fit-content' }}>
+      <Card sx={{ width: '33%', height: 'fit-content', bgcolor: '#111111', border: `1px solid ${darkTheme.border}` }}>
         <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField
             fullWidth
@@ -152,6 +160,33 @@ const VideoReview = ({ video, onBackToList }) => {
             variant="outlined"
             InputProps={{
               readOnly: true,
+            }}
+            sx={{
+              marginBottom: 2, '& .MuiOutlinedInput-root': {
+                color: darkTheme.text, // This sets the input text color
+                '& fieldset': {
+                  borderColor: darkTheme.border,
+                },
+                '&:hover fieldset': {
+                  borderColor: darkTheme.text,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: darkTheme.text,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: darkTheme.text, // This sets the label color
+              },
+              '& .MuiInputBase-input::placeholder': {
+                color: 'rgba(255, 255, 255, 0.7)', // This sets the placeholder color
+                opacity: 1,
+              },
+              '& .MuiInputLabel-root.Mui-focused': {
+                color: darkTheme.text, // Color when focused and floating
+              },
+              '& .MuiInputLabel-shrink': {
+                color: darkTheme.text, // Color when shrunk (floating)
+              },
             }}
           />
 
@@ -166,6 +201,33 @@ const VideoReview = ({ video, onBackToList }) => {
             InputProps={{
               readOnly: true,
             }}
+            sx={{
+              marginBottom: 2, '& .MuiOutlinedInput-root': {
+                color: darkTheme.text, // This sets the input text color
+                '& fieldset': {
+                  borderColor: darkTheme.border,
+                },
+                '&:hover fieldset': {
+                  borderColor: darkTheme.text,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: darkTheme.text,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: darkTheme.text, // This sets the label color
+              },
+              '& .MuiInputBase-input::placeholder': {
+                color: 'rgba(255, 255, 255, 0.7)', // This sets the placeholder color
+                opacity: 1,
+              },
+              '& .MuiInputLabel-root.Mui-focused': {
+                color: darkTheme.text, // Color when focused and floating
+              },
+              '& .MuiInputLabel-shrink': {
+                color: darkTheme.text, // Color when shrunk (floating)
+              },
+            }}
           />
 
           <TextField
@@ -176,6 +238,33 @@ const VideoReview = ({ video, onBackToList }) => {
             variant="outlined"
             InputProps={{
               readOnly: true,
+            }}
+            sx={{
+              marginBottom: 2, '& .MuiOutlinedInput-root': {
+                color: darkTheme.text, // This sets the input text color
+                '& fieldset': {
+                  borderColor: darkTheme.border,
+                },
+                '&:hover fieldset': {
+                  borderColor: darkTheme.text,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: darkTheme.text,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: darkTheme.text, // This sets the label color
+              },
+              '& .MuiInputBase-input::placeholder': {
+                color: 'rgba(255, 255, 255, 0.7)', // This sets the placeholder color
+                opacity: 1,
+              },
+              '& .MuiInputLabel-root.Mui-focused': {
+                color: darkTheme.text, // Color when focused and floating
+              },
+              '& .MuiInputLabel-shrink': {
+                color: darkTheme.text, // Color when shrunk (floating)
+              },
             }}
           />
 
@@ -188,6 +277,33 @@ const VideoReview = ({ video, onBackToList }) => {
             InputProps={{
               readOnly: true,
             }}
+            sx={{
+              marginBottom: 2, '& .MuiOutlinedInput-root': {
+                color: darkTheme.text, // This sets the input text color
+                '& fieldset': {
+                  borderColor: darkTheme.border,
+                },
+                '&:hover fieldset': {
+                  borderColor: darkTheme.text,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: darkTheme.text,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: darkTheme.text, // This sets the label color
+              },
+              '& .MuiInputBase-input::placeholder': {
+                color: 'rgba(255, 255, 255, 0.7)', // This sets the placeholder color
+                opacity: 1,
+              },
+              '& .MuiInputLabel-root.Mui-focused': {
+                color: darkTheme.text, // Color when focused and floating
+              },
+              '& .MuiInputLabel-shrink': {
+                color: darkTheme.text, // Color when shrunk (floating)
+              },
+            }}
           />
 
           <TextField
@@ -198,6 +314,33 @@ const VideoReview = ({ video, onBackToList }) => {
             variant='outlined'
             InputProps={{
               readOnly: true,
+            }}
+            sx={{
+              marginBottom: 2, '& .MuiOutlinedInput-root': {
+                color: darkTheme.text, // This sets the input text color
+                '& fieldset': {
+                  borderColor: darkTheme.border,
+                },
+                '&:hover fieldset': {
+                  borderColor: darkTheme.text,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: darkTheme.text,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: darkTheme.text, // This sets the label color
+              },
+              '& .MuiInputBase-input::placeholder': {
+                color: 'rgba(255, 255, 255, 0.7)', // This sets the placeholder color
+                opacity: 1,
+              },
+              '& .MuiInputLabel-root.Mui-focused': {
+                color: darkTheme.text, // Color when focused and floating
+              },
+              '& .MuiInputLabel-shrink': {
+                color: darkTheme.text, // Color when shrunk (floating)
+              },
             }}
           />
 
@@ -210,6 +353,33 @@ const VideoReview = ({ video, onBackToList }) => {
             InputProps={{
               readOnly: true,
             }}
+            sx={{
+              marginBottom: 2, '& .MuiOutlinedInput-root': {
+                color: darkTheme.text, // This sets the input text color
+                '& fieldset': {
+                  borderColor: darkTheme.border,
+                },
+                '&:hover fieldset': {
+                  borderColor: darkTheme.text,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: darkTheme.text,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: darkTheme.text, // This sets the label color
+              },
+              '& .MuiInputBase-input::placeholder': {
+                color: 'rgba(255, 255, 255, 0.7)', // This sets the placeholder color
+                opacity: 1,
+              },
+              '& .MuiInputLabel-root.Mui-focused': {
+                color: darkTheme.text, // Color when focused and floating
+              },
+              '& .MuiInputLabel-shrink': {
+                color: darkTheme.text, // Color when shrunk (floating)
+              },
+            }}
           />
 
           <TextField
@@ -221,6 +391,33 @@ const VideoReview = ({ video, onBackToList }) => {
             InputProps={{
               readOnly: true,
             }}
+            sx={{
+              marginBottom: 2, '& .MuiOutlinedInput-root': {
+                color: darkTheme.text, // This sets the input text color
+                '& fieldset': {
+                  borderColor: darkTheme.border,
+                },
+                '&:hover fieldset': {
+                  borderColor: darkTheme.text,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: darkTheme.text,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: darkTheme.text, // This sets the label color
+              },
+              '& .MuiInputBase-input::placeholder': {
+                color: 'rgba(255, 255, 255, 0.7)', // This sets the placeholder color
+                opacity: 1,
+              },
+              '& .MuiInputLabel-root.Mui-focused': {
+                color: darkTheme.text, // Color when focused and floating
+              },
+              '& .MuiInputLabel-shrink': {
+                color: darkTheme.text, // Color when shrunk (floating)
+              },
+            }}
           />
         </CardContent>
       </Card>
@@ -228,7 +425,7 @@ const VideoReview = ({ video, onBackToList }) => {
       {/* Right Side - Video Player and Controls */}
       <Box sx={{ width: '67%', display: 'flex', flexDirection: 'column', gap: 2 }}>
         {/* Video Player */}
-        <Card sx={{ aspectRatio: '16/9', bgcolor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+        <Card sx={{ aspectRatio: '16/9', bgcolor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', border: `1px solid ${darkTheme.border}` }}>
           {video && video.video_url ? (isPlaying ? (
             <ReactPlayer
               url={video.video_url}
@@ -264,6 +461,11 @@ const VideoReview = ({ video, onBackToList }) => {
                   color: 'white',
                   '&:hover': {
                     backgroundColor: 'rgba(0,0,0,0.7)'
+                  },
+                  '&.Mui-disabled': {
+                    backgroundColor: 'rgba(30, 30, 40, 0.5)',  // Dark bluish-gray, semi-transparent
+                    color: '#555555',                          // Darker gray than the current #888888
+                    cursor: 'not-allowed'
                   }
                 }}
                 onClick={handlePlayVideo}
@@ -280,15 +482,15 @@ const VideoReview = ({ video, onBackToList }) => {
 
         {/* Progress Bar */}
         <Card>
-          <CardContent>
+          <CardContent sx={{ bgcolor: darkTheme.paper, border: `1px solid ${darkTheme.border}` }}>
             {/* <Typography variant="body2" color="text.secondary" gutterBottom>
               Upload Progress
             </Typography> */}
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', }}>
+              <Typography variant="body2" sx={{ color: darkTheme.text }} gutterBottom>
                 Upload Progress
               </Typography>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+              <Typography variant="body2" sx={{ color: darkTheme.text }} gutterBottom>
                 {Math.round(uploadProgress)}%
               </Typography>
             </Box>
@@ -305,7 +507,14 @@ const VideoReview = ({ video, onBackToList }) => {
               color="success"
               onClick={() => handleApprove(video.id)}
               disabled={isUploading}
-              sx={{ height: '48px', opacity: isUploading ? 0.7 : 1 }}
+              sx={{
+                height: '48px', opacity: isUploading ? 0.7 : 1, '&.Mui-disabled': {
+                  backgroundColor: '#1A3320',   // Very dark green (muted version of success)
+                  color: '#6C7C6C',             // Muted greenish-gray
+                  boxShadow: 'none',
+                  borderColor: '#2C4A2C'        // Slightly lighter border
+                }
+              }}
             >
               Approve
             </Button>
@@ -317,7 +526,14 @@ const VideoReview = ({ video, onBackToList }) => {
               color="error"
               onClick={() => handleReject(video.id)}
               disabled={isUploading}
-              sx={{ height: '48px', opacity: isUploading ? 0.7 : 1 }}
+              sx={{
+                height: '48px', opacity: isUploading ? 0.7 : 1, '&.Mui-disabled': {
+                  backgroundColor: '#3A1A1A',   // Very dark red (muted version of error)
+                  color: '#7C6C6C',             // Muted reddish-gray
+                  boxShadow: 'none',
+                  borderColor: '#4A2C2C'        // Slightly lighter border
+                }
+              }}
             >
               Reject
             </Button>

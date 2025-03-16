@@ -16,21 +16,21 @@ const CustomProgressBar = ({ progress }) => (
         <div style={{
             flex: 1,
             height: '4px',
-            backgroundColor: '#edf2f7',
+            backgroundColor: '#333333',
             borderRadius: '2px',
             overflow: 'hidden'
         }}>
             <div style={{
                 width: `${progress}%`,
                 height: '100%',
-                backgroundColor: '#3b82f6',
+                backgroundColor: '#5050ff',
                 transition: 'width 0.3s ease-in-out',
                 borderRadius: '2px'
             }} />
         </div>
         <span style={{
             fontSize: '14px',
-            color: '#64748b',
+            color: '#FFFFFF',
             minWidth: '45px'
         }}>
             {progress}%
@@ -60,6 +60,106 @@ const UploadVideo = () => {
     const [isUploading, setIsUploading] = useState(false);
 
     const socket = useContext(WebSocketContext);
+
+    const darkTheme = {
+        background: '#000000', // black
+        paper: '#111111',      // very dark grey
+        primary: '#5050ff',    // vibrant shade of blue
+        text: '#FFFFFF',       // white
+        border: '#333333'      // dark grey
+        // if possible add this as a disable color 'rgba(255, 255, 255, 0.7)'
+    };
+
+    // Custom styles for TextField components (non-disabled and disabled)
+    const customInputStyles = {
+        backgroundColor: darkTheme.background,
+        color: darkTheme.text,
+        marginBottom: 2,
+        '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+                borderColor: darkTheme.border,
+            },
+            '&:hover fieldset': {
+                borderColor: darkTheme.primary,
+            },
+            '&.Mui-focused fieldset': {
+                borderColor: darkTheme.primary,
+            },
+            input: {
+                color: darkTheme.text,
+            },
+            // Add these disabled overrides:
+            '&.Mui-disabled': {
+                '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: `${darkTheme.border} !important`,
+                },
+                '& input': {
+                    color: `${darkTheme.text} !important`,
+                    WebkitTextFillColor: `${darkTheme.text} !important`,
+                },
+                '& textarea': {
+                    color: `${darkTheme.text} !important`,
+                    WebkitTextFillColor: `${darkTheme.text} !important`,
+                },
+            },
+        },
+        '& .MuiInputLabel-root': {
+            color: darkTheme.text,
+        },
+        '& .MuiInputLabel-root.Mui-disabled': {
+            color: `${darkTheme.text} !important`,
+        },
+        // Also ensure multiline inputs are styled:
+        '& .MuiInputBase-inputMultiline': {
+            color: darkTheme.text,
+        },
+    };
+
+
+    // Custom styles for Select components (non-disabled and disabled)
+    const customSelectStyles = {
+        backgroundColor: darkTheme.background,
+        color: darkTheme.text,
+        '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: darkTheme.border,
+        },
+        '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: darkTheme.primary,
+        },
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: darkTheme.primary,
+        },
+        // Add disabled overrides for the Select component:
+        '& .MuiOutlinedInput-root.Mui-disabled': {
+            '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: `${darkTheme.border} !important`,
+            },
+        },
+        '& .MuiSelect-select.Mui-disabled': {
+            color: `${darkTheme.text} !important`,
+            WebkitTextFillColor: `${darkTheme.text} !important`,
+        },
+        '& .MuiFormLabel-root.Mui-disabled': {
+            color: `${darkTheme.text} !important`,
+        },
+    };
+
+
+    // Custom MenuProps for drop down list styling
+    const customMenuProps = {
+        PaperProps: {
+            sx: {
+                backgroundColor: darkTheme.background,
+                color: darkTheme.text,
+                '& .MuiMenuItem-root:hover': {
+                    backgroundColor: `${darkTheme.primary}33`,
+                },
+                '& .MuiMenuItem-root.Mui-selected, & .MuiMenuItem-root.Mui-selected:hover': {
+                    backgroundColor: darkTheme.background,
+                },
+            }
+        }
+    };
 
     // Listen for real-time progress events from the server
     useEffect(() => {
@@ -191,7 +291,7 @@ const UploadVideo = () => {
                     content: 'my-custom-content-class'
                 }
             });
-            setIsUploading(false); 
+            setIsUploading(false);
         }
     };
 
@@ -204,7 +304,7 @@ const UploadVideo = () => {
 
     return (
         <Box component="form" onSubmit={handleSubmit} autoComplete="off">
-            <Typography variant="h5">Upload a New Video</Typography>
+            <Typography variant="h5" sx={{ color: darkTheme.text }}>Upload a New Video</Typography>
             <Box sx={{ marginTop: 2 }}>
                 {/* Title */}
                 <TextField
@@ -214,8 +314,9 @@ const UploadVideo = () => {
                     fullWidth
                     value={formData.title}
                     onChange={handleChange}
-                    sx={{ marginBottom: 2 }}
+                    sx={customInputStyles}
                     disabled={isUploading}
+                    required
                 />
 
                 {/* Description */}
@@ -228,8 +329,9 @@ const UploadVideo = () => {
                     rows={4}
                     value={formData.description}
                     onChange={handleChange}
-                    sx={{ marginBottom: 2 }}
+                    sx={customInputStyles}
                     disabled={isUploading}
+                    required
                 />
 
                 {/* Tags */}
@@ -240,13 +342,14 @@ const UploadVideo = () => {
                     fullWidth
                     value={formData.tags}
                     onChange={handleChange}
-                    sx={{ marginBottom: 2 }}
+                    sx={customInputStyles}
                     disabled={isUploading}
+                    required
                 />
 
                 {/* Category */}
                 <FormControl fullWidth sx={{ marginBottom: 2 }}>
-                    <InputLabel id="category-label">Category</InputLabel>
+                    <InputLabel id="category-label" required sx={{ color: darkTheme.text, '&.Mui-focused': { color: darkTheme.text } }}>Category</InputLabel>
                     <Select
                         name='category'
                         labelId="category-label"
@@ -255,6 +358,17 @@ const UploadVideo = () => {
                         // defaultValue=""
                         onChange={handleChange}
                         disabled={isUploading}
+                        // sx={customSelectStyles}
+                        sx={{
+                            ...customSelectStyles,
+                            '&.Mui-disabled': {
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: `${darkTheme.border} !important`,
+                                },
+                            },
+                        }}
+                        MenuProps={customMenuProps}
+                        required
                     >
                         <MenuItem value={24}>Entertainment</MenuItem>
                         <MenuItem value={27}>Education</MenuItem>
@@ -270,8 +384,9 @@ const UploadVideo = () => {
                     fullWidth
                     value={formData.defaultLanguage}
                     onChange={handleChange}
-                    sx={{ marginBottom: 2 }}
+                    sx={customInputStyles}
                     disabled={isUploading}
+                    required
                 />
 
                 {/* Default Audio Language */}
@@ -282,13 +397,14 @@ const UploadVideo = () => {
                     fullWidth
                     value={formData.defaultAudioLanguage}
                     onChange={handleChange}
-                    sx={{ marginBottom: 2 }}
+                    sx={customInputStyles}
                     disabled={isUploading}
+                    required
                 />
 
                 {/* Privacy Status */}
                 <FormControl fullWidth sx={{ marginBottom: 2 }}>
-                    <InputLabel id="privacy-label">Privacy Status</InputLabel>
+                    <InputLabel id="privacy-label" required sx={{ color: darkTheme.text, '&.Mui-focused': { color: darkTheme.text } }}>Privacy Status</InputLabel>
                     <Select
                         name='privacyStatus'
                         labelId="privacy-label"
@@ -297,6 +413,17 @@ const UploadVideo = () => {
                         value={formData.privacyStatus}
                         onChange={handleChange}
                         disabled={isUploading}
+                        // sx={customSelectStyles}
+                        sx={{
+                            ...customSelectStyles,
+                            '&.Mui-disabled': {
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: `${darkTheme.border} !important`,
+                                },
+                            },
+                        }}
+                        MenuProps={customMenuProps}
+                        required
                     >
                         <MenuItem value="private">Private</MenuItem>
                         <MenuItem value="public">Public</MenuItem>
@@ -309,7 +436,13 @@ const UploadVideo = () => {
                     <Button
                         variant="contained"
                         component="label"
-                        sx={{ width: '200px' }}
+                        sx={{
+                            width: '200px', color: darkTheme.text, backgroundColor: darkTheme.primary, '&.Mui-disabled': {
+                                backgroundColor: '#2a2a50',  // Darker version of primary
+                                color: '#888888',           // Muted text color
+                                borderColor: '#444444'      // Slightly lighter border
+                            }
+                        }}
                         disabled={isUploading}
                     >
                         Upload Video
@@ -317,7 +450,7 @@ const UploadVideo = () => {
                     </Button>
                     {videoFileName && (
                         <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" gutterBottom>
+                            <Typography variant="body2" sx={{ color: darkTheme.text }} gutterBottom>
                                 {videoFileName}
                             </Typography>
                             <CustomProgressBar progress={overallProgress} />
@@ -331,14 +464,23 @@ const UploadVideo = () => {
                     <Button
                         variant="contained"
                         component="label"
-                        sx={{ width: '200px' }}
+                        sx={{
+                            width: '200px',
+                            color: darkTheme.text,
+                            backgroundColor: darkTheme.primary,
+                            '&.Mui-disabled': {
+                                backgroundColor: '#2a2a50',
+                                color: '#888888',
+                                borderColor: '#444444'
+                            }
+                        }}
                         disabled={isUploading}>
                         Upload Thumbnail
-                        <input type="file" hidden name='thumbnail' onChange={handleFileChange} disabled={isUploading}/>
+                        <input type="file" hidden name='thumbnail' onChange={handleFileChange} disabled={isUploading} />
                     </Button>
                     {thumbnailFileName && (
                         <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" gutterBottom>
+                            <Typography variant="body2" sx={{ color: darkTheme.text }} gutterBottom>
                                 {thumbnailFileName}
                             </Typography>
                             <CustomProgressBar progress={overallProgress} />
@@ -350,10 +492,19 @@ const UploadVideo = () => {
                 <Button
                     type='submit'
                     variant="contained"
-                    sx={{ display: 'block' }}
+                    sx={{
+                        display: 'block',
+                        color: darkTheme.text,
+                        backgroundColor: darkTheme.primary,
+                        '&.Mui-disabled': {
+                            backgroundColor: '#2a2a50',
+                            color: '#888888',
+                            borderColor: '#444444'
+                        }
+                    }}
                     disabled={isUploading}
                 >
-                     {isUploading ? 'Uploading...' : 'Submit'}
+                    {isUploading ? 'Uploading...' : 'Submit'}
                 </Button>
             </Box>
         </Box>

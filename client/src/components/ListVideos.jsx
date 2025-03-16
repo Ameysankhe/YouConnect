@@ -22,6 +22,14 @@ const ListVideos = () => {
             : description;
     };
 
+    const darkTheme = {
+        background: '#000000', //black
+        paper: '#111111', // very dark grey
+        primary: '#5050ff', // vibrant shade of blue
+        text: '#FFFFFF', // white
+        border: '#333333' // dark grey
+    };
+
     const fetchVideosList = async () => {
         try {
             const response = await axios.get(`http://localhost:4000/workspace/${id}/listofvideos`, { withCredentials: true });
@@ -40,7 +48,7 @@ const ListVideos = () => {
     if (loading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <CircularProgress />
+                <CircularProgress sx={{ color: darkTheme.primary }} />
             </div>
         );
     }
@@ -75,7 +83,7 @@ const ListVideos = () => {
 
     return (
         <Box>
-            <Typography variant="h5" sx={{ marginBottom: 2 }}>
+            <Typography variant="h5" sx={{ marginBottom: 2, color: darkTheme.text }}>
                 Video Collection
             </Typography>
             <Grid container spacing={2}>
@@ -85,7 +93,8 @@ const ListVideos = () => {
                             height: '100%',
                             display: 'flex',
                             flexDirection: 'column',
-                            position: 'relative'
+                            position: 'relative',
+                            border: `1px solid ${darkTheme.border}`,
                         }}>
                             <Box sx={{
                                 position: 'relative', paddingTop: '56.25%',
@@ -101,7 +110,8 @@ const ListVideos = () => {
                                         left: 0,
                                         width: '100%',
                                         height: '100%',
-                                        objectFit: 'cover'
+                                        objectFit: 'cover',
+                                        borderBottom: `1px solid ${darkTheme.border}`,
                                     }}
                                 />
                                 {video.status === 'Rejected' && (
@@ -119,9 +129,9 @@ const ListVideos = () => {
                                     </IconButton>
                                 )}
                             </Box>
-                            <CardContent sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                                <Typography variant="h6">{video.title}</Typography>
-                                <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 1 }}>
+                            <CardContent sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, backgroundColor: darkTheme.paper }}>
+                                <Typography variant="h6" sx={{ color: darkTheme.text }}>{video.title}</Typography>
+                                <Typography variant="body2" sx={{ marginBottom: 1, color: darkTheme.text }}>
                                     {truncateDescription(video.description)}
                                 </Typography>
                                 <Box sx={{
@@ -140,8 +150,8 @@ const ListVideos = () => {
                                     )}
                                     {video.status === 'Approved' && (
                                         <>
-                                            <VerifiedIcon sx={{ color: 'success.main', marginRight: 1 }} />
-                                            <Typography variant="body2" sx={{ color: 'success.main' }}>
+                                            <VerifiedIcon sx={{ color: 'success.light', marginRight: 1 }} />
+                                            <Typography variant="body2" sx={{ color: 'success.light' }}>
                                                 {video.status}
                                             </Typography>
                                         </>

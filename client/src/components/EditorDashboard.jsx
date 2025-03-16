@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Box, Button, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, Snackbar, Alert, Badge, Popover, CircularProgress,} from "@mui/material";
+import { AppBar, Toolbar, Typography, Box, Button, IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText, Snackbar, Alert, Badge, Popover, CircularProgress, } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -23,7 +23,7 @@ const EditorDashboard = () => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
-    severity: "info", 
+    severity: "info",
   });
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -33,6 +33,14 @@ const EditorDashboard = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const { setIsAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const darkTheme = {
+    background: '#000000', //black
+    paper: '#111111', // very dark grey
+    primary: '#5050ff', // vibrant shade of blue
+    text: '#FFFFFF', // white
+    border: '#333333' // dark grey
+  };
 
   // Fetch user info on component mount
   useEffect(() => {
@@ -53,7 +61,7 @@ const EditorDashboard = () => {
       .catch((error) => {
         console.error('Error fetching user info:', error);
       });
-      
+
   }, []);
 
   useEffect(() => {
@@ -82,14 +90,14 @@ const EditorDashboard = () => {
     fetchNotifications(); // Fetch notifications initially
     const intervalId = setInterval(fetchNotifications, 7200000); // Fetch every 2 hours
 
-    return () => clearInterval(intervalId); 
+    return () => clearInterval(intervalId);
   }, []);
 
   const fetchWorkspaces = async () => {
     try {
       const response = await fetch("http://localhost:4000/editor/workspaces", {
         method: 'GET',
-        credentials: "include", 
+        credentials: "include",
       });
 
       if (response.ok) {
@@ -106,7 +114,7 @@ const EditorDashboard = () => {
   };
 
   useEffect(() => {
-    fetchWorkspaces(); 
+    fetchWorkspaces();
   }, []);
 
   useEffect(() => {
@@ -240,11 +248,14 @@ const EditorDashboard = () => {
   const id = open ? 'account-popover' : undefined;
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex",   bgcolor: darkTheme.background,
+      minHeight: '100vh'}}>
       <AppBar
         position="fixed"
         sx={{
-          zIndex: (theme) => theme.zIndex.drawer + 1
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          bgcolor: darkTheme.paper,
+          borderBottom: `1px solid ${darkTheme.border}`,
         }}
       >
         <Toolbar>
@@ -299,6 +310,9 @@ const EditorDashboard = () => {
           flexShrink: 0,
           '& .MuiDrawer-paper': {
             boxSizing: 'border-box',
+            bgcolor: darkTheme.paper,
+            borderRight: `1px solid ${darkTheme.border}`,
+            color: darkTheme.text,
             position: 'fixed',
             height: '100vh',
             transition: 'width 0.2s',
@@ -319,7 +333,7 @@ const EditorDashboard = () => {
           <List>
             <ListItem button>
               <ListItemIcon>
-                <DashboardIcon />
+                <DashboardIcon sx={{color: darkTheme.primary}}/>
               </ListItemIcon>
               <ListItemText primary="Dashboard" />
             </ListItem>
@@ -328,7 +342,7 @@ const EditorDashboard = () => {
           <List>
             <ListItem button onClick={handleLogout}>
               <ListItemIcon>
-                <LogoutIcon />
+                <LogoutIcon sx={{color: darkTheme.text}} />
               </ListItemIcon>
               <ListItemText primary="Logout" />
             </ListItem>
@@ -340,7 +354,6 @@ const EditorDashboard = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          bgcolor: 'background.default',
           p: 3,
           marginTop: 8,
           transition: 'margin-left 0.2s',
@@ -419,7 +432,7 @@ const EditorDashboard = () => {
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 4 }}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-              <CircularProgress />
+              <CircularProgress sx={{ color: darkTheme.primary }}/>
             </Box>
           ) : (workspaces.length > 0 ? (
             workspaces.map((workspace) => (
@@ -427,7 +440,9 @@ const EditorDashboard = () => {
                 key={workspace.id}
                 sx={{
                   width: "80%",
-                  backgroundColor: "white",
+                  backgroundColor: darkTheme.paper,
+                  color: darkTheme.text,
+                  border: `1px solid ${darkTheme.border}`,
                   padding: 2,
                   borderRadius: 2,
                   boxShadow: 2,
@@ -435,11 +450,10 @@ const EditorDashboard = () => {
                 }}
               >
                 <Typography variant="h6">{workspace.name}</Typography>
-                <Typography variant="body2" color="textSecondary">{workspace.description}</Typography>
+                <Typography variant="body2" sx={{color: darkTheme.text}}>{workspace.description}</Typography>
                 <Button
                   variant="contained"
-                  color="primary"
-                  sx={{ mt: 2 }}
+                  sx={{ mt: 2, color: darkTheme.text, backgroundColor: darkTheme.primary }}
                   onClick={() => navigate(`/workspace/${workspace.id}`)}
                 >
                   Enter Workspace
@@ -447,9 +461,10 @@ const EditorDashboard = () => {
               </Box>
             ))
           ) : (
-            <Typography variant="h6" color="textSecondary">No work assigned</Typography>
+            <Typography variant="h6" sx={{color: darkTheme.text}}>No workspace assigned yet</Typography>
           ))}
         </Box>
+
       </Box>
 
       <Snackbar

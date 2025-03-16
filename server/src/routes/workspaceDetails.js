@@ -12,9 +12,10 @@ router.get('/:id', async (req, res) => {
     try {
         
         const workspaceQuery = `
-            SELECT id, name, description, created_at, oauth_token, owner_id
-            FROM workspaces
-            WHERE id = $1
+            SELECT w.id, w.name, w.description, w.created_at, w.oauth_token, w.owner_id, u.username AS owner_name
+            FROM workspaces w
+            JOIN users u ON w.owner_id = u.id
+            WHERE w.id = $1
         `;
         const workspaceResult = await pool.query(workspaceQuery, [workspaceId]);
 
