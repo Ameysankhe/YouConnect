@@ -20,8 +20,8 @@ const Pricing = () => {
                 { text: 'Up to total 50 Videos', available: true },
                 // { text: 'Normal Analytics', available: true },
                 { text: '24-hour support response time', available: true },
-                { text: 'No Multiple Editors for Single Channel', available: false },
-                { text: 'No Priority Support', available: false },
+                { text: 'Priority Support', available: false },
+                { text: 'Multiple Editors for Single Channel', available: false },
                 // { text: 'No Custom Integration', available: false },
             ],
         },
@@ -37,7 +37,7 @@ const Pricing = () => {
                 // { text: 'Advance Analytics', available: true },
                 { text: '1-hour support response time', available: true },
                 { text: 'Priority support', available: true },
-                { text: 'No Multiple Editors for Single Channel', available: false },
+                { text: 'Multiple Editors for Single Channel', available: false },
                 // { text: 'No Custom Integration', available: false },
             ],
         },
@@ -53,7 +53,7 @@ const Pricing = () => {
                 // { text: 'Advance Analytics', available: true },
                 { text: '30-minute support response time', available: true },
                 { text: 'Priority support', available: true },
-                { text: 'No Multiple Editors for Single Channel', available: true },
+                { text: 'Multiple Editors for Single Channel', available: true },
                 // { text: 'Dedicated account manager', available: true },
                 // { text: 'Custom integrations', available: true },
             ],
@@ -93,7 +93,10 @@ const Pricing = () => {
                                 {isYearly ? plan.yearlyPrice : plan.monthlyPrice} /{' '}
                                 {isYearly ? 'yr' : 'mo'}
                             </h3>
-                            <button className="buy-button">Buy {plan.title}</button>
+                            {/* <button className="buy-button">Buy {plan.title}</button> */}
+                            <button className="buy-button">
+                                {plan.title === 'Free' ? 'Start Free' : `Buy ${plan.title}`}
+                            </button>
                             <ul className="features">
                                 {plan.features.map((feature, i) => (
                                     <li key={i} className={feature.available ? 'available' : 'unavailable'}>
