@@ -10,11 +10,15 @@ import {
   LinearProgress,
   Grid,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import axios from 'axios';
 import { WebSocketContext } from '../context/WebSocketProvider';
-import { useParams } from 'react-router-dom';
+import { useParams,} from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 const VideoReview = ({ video, onBackToList }) => {
@@ -34,6 +38,7 @@ const VideoReview = ({ video, onBackToList }) => {
   const [played, setPlayed] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [showAccessMessage, setShowAccessMessage] = useState(false);
   const socket = useContext(WebSocketContext);
 
   const darkTheme = {
@@ -76,10 +81,6 @@ const VideoReview = ({ video, onBackToList }) => {
         videoId,
         workspaceId: id,
       });
-      // const confirmResult = window.confirm(response.data.message);
-      // if (confirmResult) {
-      //   onBackToList();
-      // }
       Swal.fire({
         icon: 'success',
         title: 'Upload Successful!',
@@ -99,17 +100,22 @@ const VideoReview = ({ video, onBackToList }) => {
     } catch (error) {
       console.error('Error approving video:', error);
       // alert('Failed to approve video.');
-      Swal.fire({
-        icon: 'error',
-        title: 'Upload Failed',
-        text: 'Failed to upload video. Please try again.',
-        backdrop: false,
-        customClass: {
-          popup: 'my-custom-popup-class',
-          title: 'my-custom-title-class',
-          content: 'my-custom-content-class'
-        }
-      });
+      if (error.response && error.response.status === 403 &&
+        error.response.data.message === 'Please grant access to your YouTube channel first.') {
+        setShowAccessMessage(true);
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Upload Failed',
+          text: 'Failed to upload video. Please try again.',
+          backdrop: false,
+          customClass: {
+            popup: 'my-custom-popup-class',
+            title: 'my-custom-title-class',
+            content: 'my-custom-content-class'
+          }
+        });
+      }
     } finally {
       setIsUploading(false);
     }
@@ -149,6 +155,30 @@ const VideoReview = ({ video, onBackToList }) => {
 
   return (
     <Box sx={{ display: 'flex', gap: 3, p: 3, bgcolor: '#111111', border: `1px solid ${darkTheme.border}`, minHeight: '100vh' }}>
+
+      {/* Modal Dialog for Access Message */}
+      <Dialog
+        open={showAccessMessage}
+        onClose={() => setShowAccessMessage(false)}
+      >
+        <DialogTitle>
+          Access Required
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Please grant access to your YouTube channel first.
+          </Typography>
+        </DialogContent>
+        <DialogActions   sx={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <Button
+            variant="contained"
+            onClick={() => setShowAccessMessage(false)}
+          >
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Left Side - Form */}
       <Card sx={{ width: '33%', height: 'fit-content', bgcolor: '#111111', border: `1px solid ${darkTheme.border}` }}>
         <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

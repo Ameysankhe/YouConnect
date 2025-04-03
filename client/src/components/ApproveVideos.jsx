@@ -82,7 +82,7 @@ const ApproveVideos = ({ editorId }) => {
   }
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', padding: '20px' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px',  }}>
       {videos.map((video) => (
         <Card
           key={video.id}

@@ -10,6 +10,26 @@ const router = express.Router();
 
 // Configure multer for file uploads
 const upload = multer({ storage: multer.memoryStorage() });
+const MAX_THUMBNAIL_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_VIDEO_SIZE = 256 * 1024 * 1024 * 1024; // 256GB
+const VALID_ISO_CODES = [
+    'aa', 'ab', 'ae', 'af', 'ak', 'am', 'an', 'ar', 'as', 'av', 'ay', 'az',
+    'ba', 'be', 'bg', 'bh', 'bi', 'bm', 'bn', 'bo', 'br', 'bs', 'ca', 'ce',
+    'ch', 'co', 'cr', 'cs', 'cu', 'cv', 'cy', 'da', 'de', 'dv', 'dz', 'ee',
+    'el', 'en', 'eo', 'es', 'et', 'eu', 'fa', 'ff', 'fi', 'fj', 'fo', 'fr',
+    'fy', 'ga', 'gd', 'gl', 'gn', 'gu', 'gv', 'ha', 'he', 'hi', 'ho', 'hr',
+    'ht', 'hu', 'hy', 'hz', 'ia', 'id', 'ie', 'ig', 'ii', 'ik', 'io', 'is',
+    'it', 'iu', 'ja', 'jv', 'ka', 'kg', 'ki', 'kj', 'kk', 'kl', 'km', 'kn',
+    'ko', 'kr', 'ks', 'ku', 'kv', 'kw', 'ky', 'la', 'lb', 'lg', 'li', 'ln',
+    'lo', 'lt', 'lu', 'lv', 'mg', 'mh', 'mi', 'mk', 'ml', 'mn', 'mr', 'ms',
+    'mt', 'my', 'na', 'nb', 'nd', 'ne', 'ng', 'nl', 'nn', 'no', 'nr', 'nv',
+    'ny', 'oc', 'oj', 'om', 'or', 'os', 'pa', 'pi', 'pl', 'ps', 'pt', 'qu',
+    'rm', 'rn', 'ro', 'ru', 'rw', 'sa', 'sc', 'sd', 'se', 'sg', 'si', 'sk',
+    'sl', 'sm', 'sn', 'so', 'sq', 'sr', 'ss', 'st', 'su', 'sv', 'sw', 'ta',
+    'te', 'tg', 'th', 'ti', 'tk', 'tl', 'tn', 'to', 'tr', 'ts', 'tt', 'tw',
+    'ty', 'ug', 'uk', 'ur', 'uz', 've', 'vi', 'vo', 'wa', 'wo', 'xh', 'yi',
+    'yo', 'za', 'zh', 'zu'
+];
 
 // Route to handle video upload
 router.post('/upload', upload.fields([{ name: 'video' }, { name: 'thumbnail' }]), async (req, res) => {
@@ -22,6 +42,34 @@ router.post('/upload', upload.fields([{ name: 'video' }, { name: 'thumbnail' }])
         // Validate required fields
         if (!title || !description || !tags || !category || !default_language || !default_audio_language || !privacy_status || !videoFile || !thumbnailFile) {
             return res.status(400).json({ message: 'All fields are required.' });
+        }
+
+        // Validate tags
+        const tagsArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+        if (tagsArray.length === 0) {
+            return res.status(400).json({ message: 'Tags must contain comma-separated values' });
+        }
+
+        if (tagsArray.some(tag => tag.includes(' '))) {
+            return res.status(400).json({ message: 'Tags cannot contain spaces - use commas for separation' });
+        }
+
+        // Validate ISO codes
+        if (!VALID_ISO_CODES.includes(default_language.toLowerCase())) {
+            return res.status(400).json({ message: 'Invalid Default Language ISO code' });
+        }
+
+        if (!VALID_ISO_CODES.includes(default_audio_language.toLowerCase())) {
+            return res.status(400).json({ message: 'Invalid Default Audio Language ISO code' });
+        }
+
+        // Validate file sizes
+        if (thumbnailFile.size > MAX_THUMBNAIL_SIZE) {
+            return res.status(400).json({ message: 'Thumbnail must be smaller than 2MB' });
+        }
+
+        if (videoFile.size > MAX_VIDEO_SIZE) {
+            return res.status(400).json({ message: 'Video must be smaller than 256GB' });
         }
 
         const editor_id = req.user.id;
@@ -155,6 +203,19 @@ router.post('/approve-video', async (req, res) => {
 
         if (!videoId || !workspaceId) {
             return res.status(400).json({ message: 'Video ID and Workspace ID are required.' });
+        }
+
+        // Check if the workspace has granted YouTube access by looking for tokens in the database
+        const tokenQuery = `
+         SELECT oauth_token, oauth_refresh_token 
+         FROM workspaces 
+         WHERE id = $1
+     `;
+        const tokenResult = await pool.query(tokenQuery, [workspaceId]);
+        const tokens = tokenResult.rows[0];
+
+        if (!tokens || !tokens.oauth_token || !tokens.oauth_refresh_token) {
+            return res.status(403).json({ message: 'Please grant access to your YouTube channel first.' });
         }
 
         // Fetch video metadata and editor_id from PostgreSQL

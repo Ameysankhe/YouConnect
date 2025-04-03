@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Typography, TextField, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import { Box, Typography, TextField, Button, MenuItem, Select, InputLabel, FormControl, FormHelperText, IconButton, } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 import { WebSocketContext } from '../context/WebSocketProvider';
 import Swal from 'sweetalert2';
@@ -58,6 +59,26 @@ const UploadVideo = () => {
     const [videoFileName, setVideoFileName] = useState('');
     const [thumbnailFileName, setThumbnailFileName] = useState('');
     const [isUploading, setIsUploading] = useState(false);
+    const VALID_ISO_CODES = [
+        'aa', 'ab', 'ae', 'af', 'ak', 'am', 'an', 'ar', 'as', 'av', 'ay', 'az',
+        'ba', 'be', 'bg', 'bh', 'bi', 'bm', 'bn', 'bo', 'br', 'bs', 'ca', 'ce',
+        'ch', 'co', 'cr', 'cs', 'cu', 'cv', 'cy', 'da', 'de', 'dv', 'dz', 'ee',
+        'el', 'en', 'eo', 'es', 'et', 'eu', 'fa', 'ff', 'fi', 'fj', 'fo', 'fr',
+        'fy', 'ga', 'gd', 'gl', 'gn', 'gu', 'gv', 'ha', 'he', 'hi', 'ho', 'hr',
+        'ht', 'hu', 'hy', 'hz', 'ia', 'id', 'ie', 'ig', 'ii', 'ik', 'io', 'is',
+        'it', 'iu', 'ja', 'jv', 'ka', 'kg', 'ki', 'kj', 'kk', 'kl', 'km', 'kn',
+        'ko', 'kr', 'ks', 'ku', 'kv', 'kw', 'ky', 'la', 'lb', 'lg', 'li', 'ln',
+        'lo', 'lt', 'lu', 'lv', 'mg', 'mh', 'mi', 'mk', 'ml', 'mn', 'mr', 'ms',
+        'mt', 'my', 'na', 'nb', 'nd', 'ne', 'ng', 'nl', 'nn', 'no', 'nr', 'nv',
+        'ny', 'oc', 'oj', 'om', 'or', 'os', 'pa', 'pi', 'pl', 'ps', 'pt', 'qu',
+        'rm', 'rn', 'ro', 'ru', 'rw', 'sa', 'sc', 'sd', 'se', 'sg', 'si', 'sk',
+        'sl', 'sm', 'sn', 'so', 'sq', 'sr', 'ss', 'st', 'su', 'sv', 'sw', 'ta',
+        'te', 'tg', 'th', 'ti', 'tk', 'tl', 'tn', 'to', 'tr', 'ts', 'tt', 'tw',
+        'ty', 'ug', 'uk', 'ur', 'uz', 've', 'vi', 'vo', 'wa', 'wo', 'xh', 'yi',
+        'yo', 'za', 'zh', 'zu'
+    ];
+    const MAX_THUMBNAIL_SIZE = 2 * 1024 * 1024; // 2MB in bytes
+    const MAX_VIDEO_SIZE = 256 * 1024 * 1024 * 1024; // 256GB in bytes
 
     const socket = useContext(WebSocketContext);
 
@@ -67,7 +88,6 @@ const UploadVideo = () => {
         primary: '#5050ff',    // vibrant shade of blue
         text: '#FFFFFF',       // white
         border: '#333333'      // dark grey
-        // if possible add this as a disable color 'rgba(255, 255, 255, 0.7)'
     };
 
     // Custom styles for TextField components (non-disabled and disabled)
@@ -113,8 +133,14 @@ const UploadVideo = () => {
         '& .MuiInputBase-inputMultiline': {
             color: darkTheme.text,
         },
+        '& .MuiFormHelperText-root': {
+            color: darkTheme.text,
+        },
+        // Also style disabled helper text
+        '& .MuiFormHelperText-root.Mui-disabled': {
+            color: `${darkTheme.text} !important`,
+        }
     };
-
 
     // Custom styles for Select components (non-disabled and disabled)
     const customSelectStyles = {
@@ -129,6 +155,9 @@ const UploadVideo = () => {
         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
             borderColor: darkTheme.primary,
         },
+        '& .MuiSelect-icon': {
+            color: darkTheme.text, // Change dropdown icon color to match primary color
+        },
         // Add disabled overrides for the Select component:
         '& .MuiOutlinedInput-root.Mui-disabled': {
             '& .MuiOutlinedInput-notchedOutline': {
@@ -142,6 +171,9 @@ const UploadVideo = () => {
         '& .MuiFormLabel-root.Mui-disabled': {
             color: `${darkTheme.text} !important`,
         },
+        '& .MuiSelect-icon.Mui-disabled': {
+            color: darkTheme.border, // Muted color for disabled dropdown icon
+        },
     };
 
 
@@ -151,12 +183,15 @@ const UploadVideo = () => {
             sx: {
                 backgroundColor: darkTheme.background,
                 color: darkTheme.text,
+                border: `1px solid ${darkTheme.border}`, // Add border to dropdown list
+                borderRadius: '4px',
                 '& .MuiMenuItem-root:hover': {
                     backgroundColor: `${darkTheme.primary}33`,
                 },
                 '& .MuiMenuItem-root.Mui-selected, & .MuiMenuItem-root.Mui-selected:hover': {
                     backgroundColor: darkTheme.background,
                 },
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.5)'
             }
         }
     };
@@ -192,14 +227,42 @@ const UploadVideo = () => {
         };
     }, [socket]);
 
-
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        let processedValue = value;
+
+        // Auto-lowercase for language fields
+        if (name === 'defaultLanguage' || name === 'defaultAudioLanguage') {
+            processedValue = value.toLowerCase().slice(0, 2); // Limit to 2 characters
+        }
+
+        setFormData({ ...formData, [name]: processedValue });
     };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        // Validate file size
+        if (e.target.name === 'video' && file.size > MAX_VIDEO_SIZE) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File Too Large',
+                text: 'Video file must be smaller than 256GB',
+                backdrop: false
+            });
+            return;
+        }
+
+        if (e.target.name === 'thumbnail' && file.size > MAX_THUMBNAIL_SIZE) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File Too Large',
+                text: 'Thumbnail must be smaller than 2MB',
+                backdrop: false
+            });
+            return;
+        }
 
         if (e.target.name === 'video') {
             setVideoFile(file);
@@ -209,6 +272,24 @@ const UploadVideo = () => {
             setThumbnailFile(file);
             setThumbnailFileName(file.name);
         }
+    };
+
+    // New function to remove uploaded files
+    const handleRemoveFile = (fileType) => {
+        if (fileType === 'video') {
+            setVideoFile(null);
+            setVideoFileName('');
+            // Reset the file input
+            const videoInput = document.querySelector('input[name="video"]');
+            if (videoInput) videoInput.value = '';
+        } else if (fileType === 'thumbnail') {
+            setThumbnailFile(null);
+            setThumbnailFileName('');
+            // Reset the file input
+            const thumbnailInput = document.querySelector('input[name="thumbnail"]');
+            if (thumbnailInput) thumbnailInput.value = '';
+        }
+        setOverallProgress(0);
     };
 
     const handleSubmit = async (e) => {
@@ -224,7 +305,31 @@ const UploadVideo = () => {
             !videoFile ||
             !thumbnailFile
         ) {
-            alert('All fields are required. Please fill out all fields.');
+            // alert('All fields are required. Please fill out all fields.');
+            Swal.fire('Error', 'All fields are required. Please fill out all fields.', 'error');
+            return;
+        }
+
+        const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+        if (tagsArray.length === 0) {
+            Swal.fire('Error', 'Tags must contain comma-separated values', 'error');
+            return;
+        }
+        if (tagsArray.some(tag => tag.includes(' '))) {
+            Swal.fire('Error', 'Tags cannot contain spaces - use commas for separation (e.g. tutorial,tech)', 'error');
+            return;
+        }
+
+        const lang = formData.defaultLanguage.toLowerCase().trim();
+        const audioLang = formData.defaultAudioLanguage.toLowerCase().trim();
+
+        if (!VALID_ISO_CODES.includes(lang)) {
+            Swal.fire('Error', 'Invalid Default Language. Use valid 2-letter ISO 639-1 code (e.g. en, es, de)', 'error');
+            return;
+        }
+
+        if (!VALID_ISO_CODES.includes(audioLang)) {
+            Swal.fire('Error', 'Invalid Default Audio Language. Use valid 2-letter ISO 639-1 code (e.g. en, es, de)', 'error');
             return;
         }
 
@@ -302,6 +407,12 @@ const UploadVideo = () => {
         marginBottom: '20px'
     };
 
+    const fileInfoStyle = {
+        display: 'flex',
+        alignItems: 'center',
+        flex: 1
+    };
+
     return (
         <Box component="form" onSubmit={handleSubmit} autoComplete="off">
             <Typography variant="h5" sx={{ color: darkTheme.text }}>Upload a New Video</Typography>
@@ -344,6 +455,7 @@ const UploadVideo = () => {
                     onChange={handleChange}
                     sx={customInputStyles}
                     disabled={isUploading}
+                    helperText="One or more comma-separated tags (e.g. tutorial or tech,tutorial)"
                     required
                 />
 
@@ -373,6 +485,12 @@ const UploadVideo = () => {
                         <MenuItem value={24}>Entertainment</MenuItem>
                         <MenuItem value={27}>Education</MenuItem>
                         <MenuItem value={28}>Science & Technology</MenuItem>
+                        <MenuItem value={1}>Film & Animation</MenuItem>
+                        <MenuItem value={10}>Music</MenuItem>
+                        <MenuItem value={17}>Sports </MenuItem>
+                        <MenuItem value={19}>Travel & Events</MenuItem>
+                        <MenuItem value={20}>Gaming</MenuItem>
+                        <MenuItem value={22}>People & Blogs</MenuItem>
                     </Select>
                 </FormControl>
 
@@ -386,6 +504,11 @@ const UploadVideo = () => {
                     onChange={handleChange}
                     sx={customInputStyles}
                     disabled={isUploading}
+                    inputProps={{
+                        pattern: "[a-zA-Z]{2}",
+                        title: "2-letter ISO code (e.g. en, es)"
+                    }}
+                    helperText="2-letter ISO code (e.g. en, es)"
                     required
                 />
 
@@ -399,6 +522,11 @@ const UploadVideo = () => {
                     onChange={handleChange}
                     sx={customInputStyles}
                     disabled={isUploading}
+                    inputProps={{
+                        pattern: "[a-zA-Z]{2}",
+                        title: "2-letter ISO code (e.g. en, es)"
+                    }}
+                    helperText="2-letter ISO code (e.g. en, es)"
                     required
                 />
 
@@ -448,11 +576,34 @@ const UploadVideo = () => {
                         Upload Video
                         <input type="file" hidden name='video' onChange={handleFileChange} disabled={isUploading} />
                     </Button>
+                    <FormHelperText sx={{ color: darkTheme.text, marginLeft: '0px', marginTop: '4px' }}>
+                        Video must be smaller than 256GB
+                    </FormHelperText>
                     {videoFileName && (
                         <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" sx={{ color: darkTheme.text }} gutterBottom>
+                            {/* <Typography variant="body2" sx={{ color: darkTheme.text }} gutterBottom>
                                 {videoFileName}
-                            </Typography>
+                            </Typography> */}
+                            <div style={fileInfoStyle}>
+                                <Typography variant="body2" sx={{ color: darkTheme.text, flex: 1 }} gutterBottom>
+                                    {videoFileName}
+                                </Typography>
+                                <IconButton
+                                    onClick={() => handleRemoveFile('video')}
+                                    disabled={isUploading}
+                                    sx={{
+                                        color: darkTheme.text,
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                        },
+                                        '&.Mui-disabled': {
+                                            color: 'rgba(255, 255, 255, 0.3)'
+                                        }
+                                    }}
+                                >
+                                    <CloseIcon />
+                                </IconButton>
+                            </div>
                             <CustomProgressBar progress={overallProgress} />
                         </Box>
                     )}
@@ -478,11 +629,34 @@ const UploadVideo = () => {
                         Upload Thumbnail
                         <input type="file" hidden name='thumbnail' onChange={handleFileChange} disabled={isUploading} />
                     </Button>
+                    <FormHelperText sx={{ color: darkTheme.text, marginLeft: '0px', marginTop: '4px' }}>
+                        Thumbnail must be smaller than 2MB
+                    </FormHelperText>
                     {thumbnailFileName && (
                         <Box sx={{ flex: 1 }}>
-                            <Typography variant="body2" sx={{ color: darkTheme.text }} gutterBottom>
+                            {/* <Typography variant="body2" sx={{ color: darkTheme.text }} gutterBottom>
                                 {thumbnailFileName}
-                            </Typography>
+                            </Typography> */}
+                            <div style={fileInfoStyle}>
+                                <Typography variant="body2" sx={{ color: darkTheme.text, flex: 1 }} gutterBottom>
+                                    {thumbnailFileName}
+                                </Typography>
+                                <IconButton
+                                    onClick={() => handleRemoveFile('thumbnail')}
+                                    disabled={isUploading}
+                                    sx={{
+                                        color: darkTheme.text,
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                        },
+                                        '&.Mui-disabled': {
+                                            color: 'rgba(255, 255, 255, 0.3)'
+                                        }
+                                    }}
+                                >
+                                    <CloseIcon />
+                                </IconButton>
+                            </div>
                             <CustomProgressBar progress={overallProgress} />
                         </Box>
                     )}

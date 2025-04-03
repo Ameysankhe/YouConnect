@@ -15,13 +15,13 @@ The YouTube Middleware is designed to streamline the collaboration between YouTu
 ### Prerequisites
 - Node.js and npm installed on your local machine.
 - A GitHub account for repository access and contributions.
-- Basic knowledge of React, Express, Node.js, Postgresql, AWS Services and YouTube API.
+- Basic knowledge of React, Express, Node.js, Postgresql, Firebase storage and YouTube API.
 
 ### Installation
 
 1. **Clone the Repository:**
     ```bash
-    git clone https://github.com/Ameysankhe/YouTube-Middleware.git
+    git clone https://github.com/Ameysankhe/YouConnect.git
     ```
 
 2. **Navigate to the Project Directory:**
@@ -46,12 +46,13 @@ The YouTube Middleware is designed to streamline the collaboration between YouTu
 
 ### For Editors:
 - Sign up on the platform and log in.
-- Access and edit video content.
-- Update progress and upload completed videos.
+- Access workspace and upload relevant content.
+- Communicate with youtuber for continuous enhancement.
 
 ### For Creators:
 - Sign up and log in.
-- Grant video editors access to your channel.
+- Grant our platform the access to your channel.
+- Invite editors for collaboration.
 - Track editing progress and approve videos for upload.
 
 ## Contributing

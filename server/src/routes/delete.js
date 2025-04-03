@@ -61,4 +61,58 @@ router.delete('/delete/:videoId', async (req, res) => {
     }
 });
 
+// Auto-delete videos approved 30+ days ago
+const deleteOldApprovedVideos = async () => {
+    try {
+        const videoQuery = `
+            SELECT * FROM videos
+            WHERE status = 'Approved'
+            AND updated_at <= NOW() - INTERVAL '30 days'
+        `;
+        const result = await pool.query(videoQuery);
+        const videosToDelete = result.rows;
+
+        const bucket = storage.bucket('youconnect-9671a.firebasestorage.app');
+
+        for (const video of videosToDelete) {
+            // Delete from Firebase
+            const baseUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/`;
+            const videoPath = decodeURIComponent(video.video_url.replace(baseUrl, '').split('?')[0]);
+            const folderPath = videoPath.substring(0, videoPath.lastIndexOf('/') + 1);
+            await bucket.deleteFiles({ prefix: folderPath });
+
+            // Delete from DB
+            await pool.query('DELETE FROM videos WHERE id = $1', [video.id]);
+
+            // Notify youtuber
+            const youtuberQuery = `
+                SELECT u.id AS recipient_id FROM workspaces w
+                INNER JOIN users u ON w.owner_id = u.id
+                WHERE w.id = $1
+            `;
+            const youtuberRes = await pool.query(youtuberQuery, [video.workspace_id]);
+            if (youtuberRes.rows.length > 0) {
+                const youtuber = youtuberRes.rows[0];
+                const message = `Your video "${video.title}" has been automatically removed from storage after 30 days.`;
+                await pool.query(`
+                    INSERT INTO general_notifications 
+                    (recipient_id, recipient_role, message, notification_type, related_workspace_id, related_entity_id, related_entity_type, expires_at)
+                    VALUES ($1, 'youtuber', $2, 'video_deletion', $3, $4, 'video', CURRENT_TIMESTAMP + INTERVAL '3 days')
+                `, [youtuber.recipient_id, message, video.workspace_id, video.id]);
+            }
+        }
+
+        if (videosToDelete.length > 0) {
+            console.log(`${videosToDelete.length} approved videos auto-deleted.`);
+        }
+    } catch (error) {
+        console.error('Error auto-deleting old approved videos:', error);
+    }
+};
+
+// Run every 24 hours
+setInterval(deleteOldApprovedVideos, 24 * 60 * 60 * 1000); // 24 hours
+
 export default router;
+
+

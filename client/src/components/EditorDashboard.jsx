@@ -25,7 +25,8 @@ const EditorDashboard = () => {
     message: "",
     severity: "info",
   });
-  const [notifications, setNotifications] = useState([]);
+  const [editorNotifications, setEditorNotifications] = useState([]);
+  const [dashboardNotifications, setDashboardNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,20 +66,18 @@ const EditorDashboard = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch notifications periodically
-    const fetchNotifications = async () => {
+    const fetchEditorNotifications = async () => {
       try {
         const response = await fetch("http://localhost:4000/editor/notifications", {
           method: 'GET',
-          credentials: "include", // Include credentials for authenticated requests
+          credentials: "include", 
         });
 
         if (response.ok) {
           const data = await response.json();
           console.log("Fetched Notifications:", data);
-          // Filter out notifications that are expired (older than 3 days)
           const validNotifications = data.filter(notification => !isNotificationExpired(notification.created_at));
-          setNotifications(validNotifications);
+          setEditorNotifications(validNotifications);
         } else {
           console.error("Failed to fetch notifications");
         }
@@ -87,11 +86,59 @@ const EditorDashboard = () => {
       }
     };
 
-    fetchNotifications(); // Fetch notifications initially
-    const intervalId = setInterval(fetchNotifications, 7200000); // Fetch every 2 hours
+    fetchEditorNotifications(); 
+    const intervalId = setInterval(fetchEditorNotifications, 7200000); // Fetch every 2 hours
 
     return () => clearInterval(intervalId);
   }, []);
+
+  useEffect(() => {
+    const fetchDashboardNotifications = async () => {
+      try {
+        const response = await fetch(`http://localhost:4000/editor/dashboardnotifications`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Fetched Dashboard Notifications:", data);
+          setDashboardNotifications(data);
+          const hasRemoval = data.some(notif => {
+            const msg = notif.message.toLowerCase();
+            return msg.includes('no longer a member') || 
+                   msg.includes('no longer exists');
+          });
+          if (hasRemoval) {
+            fetchWorkspaces();
+          }
+        } else {
+          console.error("Failed to fetch dashboard notifications");
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard notifications:", error);
+      }
+    };
+  
+    fetchDashboardNotifications();
+    const intervalId = setInterval(fetchDashboardNotifications, 7200000); // every 2 hours
+    return () => clearInterval(intervalId);
+  }, []);
+  
+  const markDashboardNotificationsAsViewed = async () => {
+    try {
+      const response = await fetch(`http://localhost:4000/editor/dashboardnotifications/mark-seen`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (response.ok) {
+        setDashboardNotifications([]);
+      } else {
+        console.error("Failed to mark dashboard notifications as viewed");
+      }
+    } catch (error) {
+      console.error("Error marking dashboard notifications as viewed:", error);
+    }
+  };
 
   const fetchWorkspaces = async () => {
     try {
@@ -117,11 +164,15 @@ const EditorDashboard = () => {
     fetchWorkspaces();
   }, []);
 
-  useEffect(() => {
-    if (notifications.length > 0) {
-      const latestNotification = notifications[0];
+  const mergedNotifications = [...editorNotifications, ...dashboardNotifications];
+  const unseenCount = mergedNotifications.filter(notif => !notif.seen).length;
+
+  const handleNotificationClick = () => {
+    if (showNotifications) {
+      markDashboardNotificationsAsViewed();
     }
-  }, [notifications]);
+    setShowNotifications(prev => !prev);
+  };
 
   const handleAccept = async (notificationId) => {
     try {
@@ -136,9 +187,10 @@ const EditorDashboard = () => {
           message: 'Invite accepted successfully!',
           severity: 'success',
         });
-        setNotifications((prevNotifications) =>
-          prevNotifications.filter((notification) => notification.id !== notificationId)
+        setEditorNotifications((prev) =>
+          prev.filter((notification) => notification.id !== notificationId)
         );
+        fetchWorkspaces();
       } else {
         setSnackbar({
           open: true,
@@ -169,8 +221,8 @@ const EditorDashboard = () => {
           message: 'Invite declined',
           severity: 'success',
         });
-        setNotifications((prevNotifications) =>
-          prevNotifications.filter((notification) => notification.id !== notificationId)
+        setEditorNotifications((prev) =>
+          prev.filter((notification) => notification.id !== notificationId)
         );
       } else {
         setSnackbar({
@@ -232,10 +284,6 @@ const EditorDashboard = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const handleNotificationClick = () => {
-    setShowNotifications((prev) => !prev);
-  };
-
   const handleAccountClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -245,7 +293,7 @@ const EditorDashboard = () => {
   };
 
   const open = Boolean(anchorEl);
-  const id = open ? 'account-popover' : undefined;
+  const popoverId = open ? 'account-popover' : undefined;
 
   return (
     <Box sx={{ display: "flex",   bgcolor: darkTheme.background,
@@ -272,10 +320,7 @@ const EditorDashboard = () => {
             YouConnect
           </Typography>
           <IconButton color="inherit" onClick={handleNotificationClick}>
-            <Badge
-              badgeContent={notifications.filter((notif) => !notif.seen).length}
-              color="error"
-            >
+            <Badge badgeContent={unseenCount} color="error">
               <NotificationsIcon />
             </Badge>
           </IconButton>
@@ -283,7 +328,7 @@ const EditorDashboard = () => {
             <AccountCircleIcon />
           </IconButton>
           <Popover
-            id={id}
+            id={popoverId}
             open={open}
             anchorEl={anchorEl}
             onClose={handleClose}
@@ -379,8 +424,8 @@ const EditorDashboard = () => {
               color: "black",
               backgroundColor: "white",
             }}>Notifications</Typography>
-            {notifications.length > 0 ? (
-              notifications.map((notification) => (
+            {mergedNotifications.length > 0 ? (
+              mergedNotifications.map((notification) => (
                 <Box
                   key={notification.id}
                   sx={{

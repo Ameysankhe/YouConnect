@@ -10,7 +10,7 @@ const GetStartedButton = () => {
 
     return (
         <button className='btn' onClick={handleGetStarted}>
-            Get Started
+            Get Started it's free
         </button>
     );
 };

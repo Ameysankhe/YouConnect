@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Box, Typography, TextField, Button, Paper } from '@mui/material';
 import { WebSocketContext } from '../context/WebSocketProvider';
 
@@ -6,6 +6,7 @@ const ChatRoom = ({ partnerName, senderId, receiverId, workspaceId }) => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const socket = useContext(WebSocketContext);
+    const messagesEndRef = useRef(null);
 
     // Fetch chat history from backend
     useEffect(() => {
@@ -30,6 +31,13 @@ const ChatRoom = ({ partnerName, senderId, receiverId, workspaceId }) => {
         };
     }, [socket]);
 
+    // Auto-scroll to the bottom when messages change
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
+        }
+    }, [messages]);
+
     const handleSend = () => {
         if (newMessage.trim() === '') return;
         const messagePayload = {
@@ -48,7 +56,6 @@ const ChatRoom = ({ partnerName, senderId, receiverId, workspaceId }) => {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // Optionally update the chat immediately (optimistic update)
                     setMessages(prev => [...prev, { sender_id: senderId, message: newMessage, timestamp: new Date() }]);
                     setNewMessage('');
                 }
@@ -63,8 +70,7 @@ const ChatRoom = ({ partnerName, senderId, receiverId, workspaceId }) => {
                 padding: 2,
                 backgroundColor: '#222',
                 color: '#fff',
-                // minHeight: '80vh',
-                height: '80vh', 
+                height: '80vh',
                 display: 'flex',
                 flexDirection: 'column'
             }}
@@ -72,7 +78,7 @@ const ChatRoom = ({ partnerName, senderId, receiverId, workspaceId }) => {
             <Typography variant="h6" sx={{ marginBottom: 2 }}>
                 Chat with {partnerName}
             </Typography>
-            <Box sx={{ flexGrow: 1, overflowY: 'auto', marginBottom: 2, pr: 2, pl: 2 }}>
+            <Box ref={messagesEndRef} sx={{ flexGrow: 1, overflowY: 'auto', marginBottom: 2, pr: 2, pl: 2 }}>
                 {messages.map((msg, index) => (
                     <Box
                         key={index}

@@ -68,6 +68,42 @@ router.get('/notifications/:workspaceId', async (req, res) => {
     }
 });
 
+// Route to fetch dashboard notifications for an editor
+router.get('/dashboardnotifications', async (req, res) => {
+    const editorId = req.user.id;
+    try {
+        const query = `
+            SELECT id, message, notification_type, created_at
+            FROM editor_dashboard_notifications
+            WHERE editor_id = $1  AND seen = false
+            ORDER BY created_at DESC
+        `;
+        const result = await pool.query(query, [editorId]);
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Error fetching dashboard notifications:', error);
+        res.status(500).json({ error: 'Failed to fetch dashboard notifications' });
+    }
+});
+
+// New route to mark all dashboard notifications as seen for an editor
+router.post('/dashboardnotifications/mark-seen', async (req, res) => {
+    const editorId = req.user.id;
+    try {
+        const query = `
+            UPDATE editor_dashboard_notifications
+            SET seen = TRUE
+            WHERE editor_id = $1
+        `;
+        await pool.query(query, [editorId]);
+        res.status(200).json({ message: 'Notifications marked as seen' });
+    } catch (error) {
+        console.error('Error marking notifications as seen:', error);
+        res.status(500).json({ error: 'Failed to mark notifications as seen' });
+    }
+});
+
+
 // Accept the invite
 router.post('/notifications/accept/:notificationId', async (req, res) => {
     const { notificationId } = req.params;

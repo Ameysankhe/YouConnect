@@ -12,7 +12,7 @@ const ListVideos = () => {
     const { id } = useParams();
     const [videosList, setVideosList] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+    const [menuAnchorEl, setMenuAnchorEl] = useState(null);     
     const [selectedVideo, setSelectedVideo] = useState(null);
     const [openConfirm, setOpenConfirm] = useState(false);
     const [alert, setAlert] = useState({ open: false, message: '', severity: '' });
@@ -54,7 +54,7 @@ const ListVideos = () => {
     }
 
     if (videosList.length === 0) {
-        return <Typography>No videos uploaded yet.</Typography>;
+        return <Typography sx={{color: darkTheme.text}}>No videos uploaded yet.</Typography>;
     }
 
     const handleMenuOpen = (event, video) => {

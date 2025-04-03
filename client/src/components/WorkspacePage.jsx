@@ -12,11 +12,10 @@ import ChatRoom from './ChatRoom';
 
 const drawerWidth = 240;
 
-// Helper function to check if the notification has expired (older than 3 days)
 const isNotificationExpired = (notificationDate) => {
     const notificationTime = new Date(notificationDate).getTime();
     const currentTime = new Date().getTime();
-    const expiryTime = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds
+    const expiryTime = 3 * 24 * 60 * 60 * 1000;
     return (currentTime - notificationTime) > expiryTime;
 };
 
@@ -28,6 +27,7 @@ const WorkspacePage = () => {
     const [activeSection, setActiveSection] = useState('');
     const [editorEmail, setEditorEmail] = useState('');
     const [editors, setEditors] = useState([]);
+    const [acceptedEditors, setAcceptedEditors] = useState([]); 
     const [userRole, setUserRole] = useState('');
     const [currentUser, setCurrentUser] = useState(null);
     const [notifications, setNotifications] = useState([]);
@@ -42,11 +42,11 @@ const WorkspacePage = () => {
     const navigate = useNavigate();
 
     const darkTheme = {
-        background: '#000000', //black
-        paper: '#111111', // very dark grey
-        primary: '#5050ff', // vibrant shade of blue
-        text: '#FFFFFF', // white
-        border: '#333333' // dark grey
+        background: '#000000', 
+        paper: '#111111',
+        primary: '#5050ff', 
+        text: '#FFFFFF', 
+        border: '#333333' 
     };
 
     const theme = createTheme({
@@ -71,79 +71,133 @@ const WorkspacePage = () => {
     });
 
     useEffect(() => {
-        const fetchWorkspaceDetails = async () => {
+        if (!id || !userRole || userRole !== 'editor') return;
+
+        const checkAccess = async () => {
             try {
-                const response = await fetch(`http://localhost:4000/workspace/${id}`, {
+                const response = await fetch(`http://localhost:4000/workspace/check-access/${id}`, {
                     credentials: 'include',
                 });
                 const data = await response.json();
-                console.log('Fetched workspace details:', data);
-                if (response.ok) {
-                    setWorkspace(data.workspace);
-                    if (data.workspace.oauth_token) {
-                        setHasAccess(true);
-                    }
-                    setUserRole(data.userRole)
-                } else if (response.status === 403) {
+
+                if (!data.hasAccess) {
                     setAccessDenied(true);
+                    setSnackbar({
+                        open: true,
+                        message: 'You have been removed from this workspace',
+                        severity: 'error'
+                    });
                     setTimeout(() => {
-                        if (data.userRole === 'youtuber') {
-                            // window.location.href = '/youtuber/dashboard';
-                            navigate('/youtuber/dashboard');
-                        } else {
-                            // window.location.href = '/editor/dashboard';
-                            navigate('/editor/dashboard');
-                        }
+                        navigate('/editor/dashboard');
                     }, 3000);
                 }
-                else {
-                    setSnackbar({ open: true, message: 'Failed to fetch workspace details', severity: 'error' });
-                }
             } catch (error) {
-                console.error('Error fetching workspace details:', error);
-                setSnackbar({ open: true, message: 'An error occurred.', severity: 'error' });
+                console.error('Error checking workspace access:', error);
             }
         };
 
-        const fetchEditors = async () => {
-            try {
-                const response = await fetch(`http://localhost:4000/workspace/${id}/editors`, { credentials: 'include' });
-                const data = await response.json();
-                if (response.ok) {
-                    if (data.length === 0) {
-                        setEditors([]);
+        // Check access every 5(5000) seconds
+        const intervalId = setInterval(checkAccess, 7200000);
 
+        // Initial check
+        checkAccess();
+
+        return () => clearInterval(intervalId);
+    }, [id, userRole, navigate]);
+
+    const fetchEditors = async () => {
+        try {
+            const response = await fetch(`http://localhost:4000/workspace/${id}/editors`, { credentials: 'include' });
+            const data = await response.json();
+            if (response.ok) {
+                if (data.length === 0) {
+                    setEditors([]);
+
+                } else {
+                    setEditors(data);
+                }
+            } else {
+                setSnackbar({ open: true, message: 'Failed to fetch editors', severity: 'error' });
+            }
+        } catch (error) {
+            console.error('Error fetching editors:', error);
+            setSnackbar({ open: true, message: 'An error occurred.', severity: 'error' });
+        }
+    };
+
+    const fetchAcceptedEditors = async () => {
+        try {
+            const response = await fetch(`http://localhost:4000/workspace/${id}/accepted-editors`, {
+                credentials: 'include',
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setAcceptedEditors(data.length === 0 ? [] : data);
+            } else {
+                setSnackbar({ open: true, message: 'Failed to fetch accepted editors', severity: 'error' });
+            }
+        } catch (error) {
+            console.error('Error fetching accepted editors:', error);
+            setSnackbar({ open: true, message: 'An error occurred.', severity: 'error' });
+        }
+    };
+
+    const fetchWorkspaceDetails = async () => {
+        try {
+            const response = await fetch(`http://localhost:4000/workspace/${id}`, {
+                credentials: 'include',
+            });
+            const data = await response.json();
+            console.log('Fetched workspace details:', data);
+            if (response.ok) {
+                setWorkspace(data.workspace);
+                if (data.workspace.oauth_token) {
+                    setHasAccess(true);
+                }
+                setUserRole(data.userRole)
+            } else if (response.status === 403) {
+                setAccessDenied(true);
+                setTimeout(() => {
+                    if (data.userRole === 'youtuber') {
+                        // window.location.href = '/youtuber/dashboard';
+                        navigate('/youtuber/dashboard');
                     } else {
-                        setEditors(data);
+                        // window.location.href = '/editor/dashboard';
+                        navigate('/editor/dashboard');
                     }
-                } else {
-                    setSnackbar({ open: true, message: 'Failed to fetch editors', severity: 'error' });
-                }
-            } catch (error) {
-                console.error('Error fetching editors:', error);
-                setSnackbar({ open: true, message: 'An error occurred.', severity: 'error' });
+                }, 3000);
             }
-        };
-
-        const fetchCurrentUser = async () => {
-            try {
-                const response = await fetch(`http://localhost:4000/workspaces/${id}/details`, {
-                    credentials: 'include',
-                });
-                const data = await response.json();
-                console.log('Fetched current user details:', data);
-                if (response.ok) {
-                    setCurrentUser(data.currentUser);
-                } else {
-                    console.error('Failed to fetch current user details');
-                }
-            } catch (error) {
-                console.error('Error fetching current user details:', error);
+            else {
+                setSnackbar({ open: true, message: 'Failed to fetch workspace details', severity: 'error' });
             }
-        };
+        } catch (error) {
+            console.error('Error fetching workspace details:', error);
+            setSnackbar({ open: true, message: 'An error occurred.', severity: 'error' });
+        }
+    };
 
-        fetchWorkspaceDetails();
+    const fetchCurrentUser = async () => {
+        try {
+            const response = await fetch(`http://localhost:4000/workspace/${id}/details`, {
+                credentials: 'include',
+            });
+            const data = await response.json();
+            console.log('Fetched current user details:', data);
+            if (response.ok) {
+                setCurrentUser(data.currentUser);
+            } else {
+                console.error('Failed to fetch current user details');
+            }
+        } catch (error) {
+            console.error('Error fetching current user details:', error);
+        }
+    };
+
+    useEffect(() => {
+    
         fetchEditors();
+        fetchAcceptedEditors();
+        fetchWorkspaceDetails();
         fetchCurrentUser();
 
         // Check for success state in the URL
@@ -294,6 +348,7 @@ const WorkspacePage = () => {
             if (response.ok) {
                 setSnackbar({ open: true, message: 'Request sent successfully!', severity: 'success' });
                 setEditorEmail('');
+                await fetchEditors();
             } else {
                 setSnackbar({ open: true, message: data.message || 'Failed to add editor', severity: 'error' });
             }
@@ -302,6 +357,28 @@ const WorkspacePage = () => {
             setSnackbar({ open: true, message: 'An error occurred.', severity: 'error' });
         }
     };
+
+    // Add a function to handle deleting an editor
+    const handleDeleteEditor = async (editorId) => {
+        try {
+            const response = await fetch(`http://localhost:4000/workspace/${id}/editor/${editorId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setSnackbar({ open: true, message: data.message, severity: 'success' });
+                // Remove the deleted editor from the state
+                setEditors((prevEditors) => prevEditors.filter((editor) => editor.id !== editorId));
+            } else {
+                setSnackbar({ open: true, message: data.message || 'Failed to remove editor', severity: 'error' });
+            }
+        } catch (error) {
+            console.error('Error removing editor:', error);
+            setSnackbar({ open: true, message: 'An error occurred while removing the editor.', severity: 'error' });
+        }
+    };
+
 
     const renderContent = () => {
         switch (activeSection) {
@@ -388,7 +465,18 @@ const WorkspacePage = () => {
                                                 <TableCell>{editor.email}</TableCell>
                                                 <TableCell>{editor.status}</TableCell>
                                                 <TableCell>
-                                                    <Button variant="contained" color="error" size="small">Delete</Button>
+                                                    {editor.status === 'Pending' ? (
+                                                        <Typography variant="body2" sx={{ color: darkTheme.text }}>No actions available</Typography>
+                                                    ) : (
+                                                        <Button
+                                                            variant="contained"
+                                                            color="error"
+                                                            size="small"
+                                                            onClick={() => handleDeleteEditor(editor.id)}
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         ))}
@@ -438,7 +526,7 @@ const WorkspacePage = () => {
                 }
                 if (activeSection.startsWith('chat-')) {
                     const editorId = activeSection.split('-')[1];
-                    const partner = editors.find(editor => editor.id.toString() === editorId);
+                    const partner = acceptedEditors.find(editor => editor.id.toString() === editorId);
                     const partnerName = partner ? partner.email : "Editor";
                     return (
                         <ChatRoom
@@ -468,10 +556,10 @@ const WorkspacePage = () => {
                 <Typography variant="h4" color="error">
                     Access Denied
                 </Typography>
-                <Typography variant="h6">
+                <Typography variant="h6" sx={{ color: darkTheme.text }}>
                     You do not have permission to access this workspace.
                 </Typography>
-                <Typography variant="body1">
+                <Typography variant="body1" sx={{ color: darkTheme.text }}>
                     Redirecting to dashboard...
                 </Typography>
                 <CircularProgress sx={{ mt: 2, color: darkTheme.primary }} />
@@ -589,8 +677,8 @@ const WorkspacePage = () => {
                                 </ListItem>
                                 <Collapse in={isApproveVideosOpen} timeout="auto" unmountOnExit>
                                     <List component="div" disablePadding>
-                                        {editors.length > 0 ? (
-                                            editors.map((editor) => (
+                                        {acceptedEditors.length > 0 ? (
+                                            acceptedEditors.map((editor) => (
                                                 <ListItem
                                                     key={editor.id}
                                                     button
@@ -634,8 +722,8 @@ const WorkspacePage = () => {
                                 </ListItem>
                                 <Collapse in={isChatRoomOpen} timeout="auto" unmountOnExit>
                                     <List component="div" disablePadding>
-                                        {editors.length > 0 ? (
-                                            editors.map((editor) => (
+                                        {acceptedEditors.length > 0 ? (
+                                            acceptedEditors.map((editor) => (
                                                 <ListItem
                                                     key={editor.id}
                                                     button
