@@ -96,8 +96,8 @@ const WorkspacePage = () => {
             }
         };
 
-        // Check access every 5(5000) seconds
-        const intervalId = setInterval(checkAccess, 7200000);
+        // Check access every 3 seconds
+        const intervalId = setInterval(checkAccess, 3000);
 
         // Initial check
         checkAccess();
@@ -256,7 +256,7 @@ const WorkspacePage = () => {
 
         if (userRole) {
             fetchNotifications();
-            const intervalId = setInterval(fetchNotifications, 7200000); // Fetch every 2 hours
+            const intervalId = setInterval(fetchNotifications, 3000); // Fetch every 3 seconds
             return () => clearInterval(intervalId);
         }
 

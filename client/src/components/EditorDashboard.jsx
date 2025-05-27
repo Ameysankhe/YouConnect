@@ -87,7 +87,7 @@ const EditorDashboard = () => {
     };
 
     fetchEditorNotifications(); 
-    const intervalId = setInterval(fetchEditorNotifications, 7200000); // Fetch every 2 hours
+    const intervalId = setInterval(fetchEditorNotifications, 3000); // Fetch every 3 seconds
 
     return () => clearInterval(intervalId);
   }, []);
@@ -120,7 +120,7 @@ const EditorDashboard = () => {
     };
   
     fetchDashboardNotifications();
-    const intervalId = setInterval(fetchDashboardNotifications, 7200000); // every 2 hours
+    const intervalId = setInterval(fetchDashboardNotifications, 3000);// every 3 seconds
     return () => clearInterval(intervalId);
   }, []);
   

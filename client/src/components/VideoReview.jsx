@@ -132,6 +132,7 @@ const VideoReview = ({ video, onBackToList }) => {
         backdrop: false,
         confirmButtonText: 'OK'
       }).then(() => {
+        setIsUploading(false);
         onBackToList();
       });
     } catch (error) {
@@ -140,10 +141,9 @@ const VideoReview = ({ video, onBackToList }) => {
         icon: 'error',
         title: 'Rejection Failed',
         text: 'Failed to reject video. Please try again.',
-        backdrop: false
-      });
-    } finally {
-      setIsUploading(false);
+        backdrop: true,
+        allowOutsideClick: false,
+      }).then(() => setIsUploading(false));
     }
   };
 
@@ -152,6 +152,12 @@ const VideoReview = ({ video, onBackToList }) => {
       setIsPlaying(true);
     }
   };
+
+  const handleVideoEnd = () => {
+    setIsPlaying(false);
+    setPlayed(0);
+  };
+
 
   return (
     <Box sx={{ display: 'flex', gap: 3, p: 3, bgcolor: '#111111', border: `1px solid ${darkTheme.border}`, minHeight: '100vh' }}>
@@ -469,6 +475,7 @@ const VideoReview = ({ video, onBackToList }) => {
               onDuration={(duration) => {
                 setDuration(duration);
               }}
+              onEnded={handleVideoEnd}  
             />
           ) : (
             <>
