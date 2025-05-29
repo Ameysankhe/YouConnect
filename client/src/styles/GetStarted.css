@@ -2,19 +2,25 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
- }
- 
-.getstarted-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 50px;
-  align-items: center; 
-  min-height: 100vh; 
-  padding: 20px; 
-  background-color: #000000;
 }
 
+.getstarted-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 50px;
+    align-items: center; 
+    min-height: 100vh; 
+    padding: 20px; 
+    background-color: #000000;
+}
 
-
-   
+/* Mobile layout - forms stacked vertically */
+@media (max-width: 768px) {
+    .getstarted-container {
+        flex-direction: column;
+        gap: 30px;
+        padding: 10px;
+        align-items: center;
+    }
+}

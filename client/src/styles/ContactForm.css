@@ -3,7 +3,7 @@
   align-items: center;
   background-color: #000000;
   min-height: 100vh; 
-  padding-top: 80px;
+  /* padding-top: 80px; */
 }
   
 .contact-container {
@@ -26,20 +26,54 @@
   
 .contact-details h2 {
   font-family: 'Gilroy', sans-serif;
-  font-size: 2rem;
-  margin-bottom: 20px;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  line-height: 1.2;
 }
-  
-.contact-details p {
+
+.contact-details .description {
   font-family: 'Gilroy', sans-serif;
-  margin: 10px 0;
   font-size: 1rem;
+  line-height: 1.6;
+  color: #ccc;
+  margin-bottom: 40px;
 }
-  
-.contact-details a {
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
   font-family: 'Gilroy', sans-serif;
-  color:  white;
+}
+
+.contact-icon {
+  width: 20px;
+  height: 20px;
+  fill: #fff;
+  flex-shrink: 0;
+}
+
+.contact-item span {
+  font-size: 1rem;
+  color: #fff;
+}
+
+.contact-item a {
+  font-size: 1rem;
+  color: #fff;
   text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.contact-item a:hover {
+  color: #5050ff;
 }
   
 .contact-form {
@@ -66,6 +100,19 @@
   border-radius: 5px;
   font-size: 1rem;
 }
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: #ccc;
+  opacity: 0.8;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: #5050ff;
+  box-shadow: 0 0 5px rgba(80, 80, 255, 0.3);
+}
   
 .contact-form textarea {
     flex: 1 1 100%;
@@ -82,15 +129,263 @@
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
   
 .contact-form button:hover {
   background-color:  #4f46e5;
+}
+
+.contact-form button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
 }
   
 .status {
   margin-top: 10px;
   color: #4caf50;
   font-size: 1rem;
+  text-align: center;
 }
-  
+
+/* Mobile Layout - Responsive Design */
+@media (max-width: 768px) {
+  .contactForm {
+    padding-top: 20px;
+    min-height: auto;
+    align-items: flex-start;
+    padding: 20px 15px; /* Add horizontal padding */
+  }
+
+  .contact-container {
+    flex-direction: column;
+    margin: 10px auto; /* Reduced margin */
+    padding: 20px 15px; /* Better padding */
+    max-width: 100%;
+    margin-top: 10px;
+    gap: 30px; /* Add gap between sections */
+  }
+
+  .contact-details {
+    margin-right: 0;
+    margin-bottom: 0; /* Remove bottom margin since we're using gap */
+    text-align: left; /* Change from center to left for better readability */
+    padding: 0;
+    order: 1; /* Ensure contact details come first */
+  }
+
+  .contact-details h2 {
+    padding-top: 70px;
+    font-size: 2.2rem; /* Slightly larger */
+    margin-bottom: 15px;
+    text-align: revert; /* Keep title centered */
+  }
+
+  .contact-details .description {
+    font-size: 1rem; /* Slightly larger text */
+    text-align: left; /* Better for mobile reading */
+    margin-bottom: 25px;
+    line-height: 1.7; /* Improved line height */
+  }
+
+  .contact-info {
+    gap: 18px; /* Increased gap */
+    margin-bottom: 10px;
+  }
+
+  .contact-item {
+    gap: 15px; /* Increased gap */
+    padding: 8px 0; /* Add vertical padding */
+  }
+
+  .contact-icon {
+    width: 22px; /* Slightly larger icons */
+    height: 22px;
+  }
+
+  .contact-item span,
+  .contact-item a {
+    font-size: 1rem; /* Larger text for better readability */
+  }
+
+  .contact-form {
+    width: 100%;
+    padding: 25px 20px;
+    border-radius: 12px; /* More rounded corners */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); /* Enhanced shadow */
+    order: 2; /* Ensure form comes second */
+  }
+
+  .contact-form form {
+    gap: 18px; /* Increased gap */
+  }
+
+  .contact-form input,
+  .contact-form textarea {
+    flex: 1 1 100%;
+    padding: 15px; /* Larger touch targets */
+    font-size: 1rem; /* Consistent font size */
+    border-radius: 8px;
+    border: 2px solid #444; /* Thicker border for visibility */
+    transition: all 0.3s ease;
+  }
+
+  .contact-form input:focus,
+  .contact-form textarea:focus {
+    border-color: #5050ff;
+    box-shadow: 0 0 8px rgba(80, 80, 255, 0.4);
+    transform: translateY(-2px); /* Subtle lift effect */
+  }
+
+  .contact-form textarea {
+    height: 130px; /* Taller textarea */
+    margin-top: 0;
+  }
+
+  .contact-form button {
+    padding: 18px; /* Larger touch target */
+    font-size: 1.1rem;
+    font-weight: 600; /* Bolder text */
+    border-radius: 10px;
+    margin-top: 10px;
+    text-transform: uppercase; /* Make button text stand out */
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+  }
+
+  .contact-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(80, 80, 255, 0.3);
+  }
+
+  .status {
+    font-size: 1rem;
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: rgba(76, 175, 80, 0.1);
+  }
+}
+
+/* Small Mobile Layout - Enhanced Version (480px and below) */
+@media (max-width: 480px) {
+  .contactForm {
+    padding: 15px 10px;
+  }
+
+  .contact-container {
+    margin: 5px auto;
+    padding: 15px 10px;
+    gap: 25px;
+  }
+
+  .contact-details h2 {
+    text-align: revert;
+    font-size: 2rem;
+    margin-bottom: 12px;
+  }
+
+  .contact-details .description {
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .contact-info {
+    gap: 15px;
+  }
+
+  .contact-item {
+    gap: 12px;
+    padding: 6px 0;
+  }
+
+  .contact-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .contact-item span,
+  .contact-item a {
+    font-size: 0.9rem;
+  }
+
+  .contact-form {
+    padding: 20px 15px;
+  }
+
+  .contact-form input,
+  .contact-form textarea {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+
+  .contact-form button {
+    padding: 15px;
+    font-size: 1rem;
+  }
+}
+
+/* Additional Mobile-Specific Enhancements */
+@media (max-width: 768px) {
+  /* Sticky form button for better UX */
+  .contact-form button {
+    bottom: 10px;
+    z-index: 10;
+  }
+
+  /* Better focus states for mobile accessibility */
+  .contact-form input:focus,
+  .contact-form textarea:focus {
+    outline: 3px solid rgba(80, 80, 255, 0.3);
+    outline-offset: 2px;
+  }
+
+  /* Loading state for button */
+  .contact-form button.loading {
+    background-color: #666;
+    cursor: wait;
+  }
+
+  .contact-form button.loading::after {
+    content: "...";
+    animation: dots 1.5s infinite;
+  }
+
+  @keyframes dots {
+    0%, 20% { content: "..."; }
+    40% { content: ".."; }
+    60% { content: "."; }
+    80%, 100% { content: ""; }
+  }
+
+  /* Error states for form validation */
+  .contact-form input.error,
+  .contact-form textarea.error {
+    border-color: #ff4444;
+    box-shadow: 0 0 5px rgba(255, 68, 68, 0.3);
+  }
+
+  .error-message {
+    color: #ff4444;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: block;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .contact-form input,
+  .contact-form textarea {
+    min-height: 48px; /* Minimum touch target size */
+  }
+
+  .contact-form button {
+    min-height: 48px;
+  }
+
+  .contact-item a {
+    padding: 8px 0; /* Larger touch area for links */
+  }
+}

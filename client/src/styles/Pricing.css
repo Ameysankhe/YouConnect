@@ -9,9 +9,9 @@
 .pricing-page h4 {
     font-family: 'Gilroy', sans-serif;
     font-weight: 700;
-    padding-top: 60px;
+    /* padding-top: 60px; */
     font-size: 2.5rem;
-    margin-top: 50px;
+    /* margin-top: 50px; */
     margin-bottom: 20px;
 }
 
@@ -169,5 +169,9 @@
     .pricing-page h4 {
         font-size: 2rem;
         padding-top: 40px;
+    }
+
+    .pricing-page p {
+        text-align: justify;
     }
 } 

@@ -12,6 +12,8 @@ const styles = {
         height: '100vh',
         backgroundColor: 'black',
         overflow: 'hidden',
+        padding: '0 20px', // Add horizontal padding for mobile
+        boxSizing: 'border-box'
     },
     blackHoleContainer: {
         marginTop: '150px',
@@ -44,6 +46,54 @@ const styles = {
     }
 };
 
+// Mobile-specific responsive styles
+const mobileStyles = `
+    @media (max-width: 768px) {
+        .black-hole-container {
+            margin-top: 80px !important;
+            margin-bottom: 60px !important;
+        }
+        
+        .black-hole {
+            width: 200px !important;
+            height: 200px !important;
+        }
+        
+        .coming-soon-text {
+            font-size: 16px !important;
+            letter-spacing: 8px !important;
+            text-align: center;
+        }
+        
+        .brand-text {
+            font-size: 12px !important;
+            letter-spacing: 4px !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .black-hole-container {
+            margin-top: 60px !important;
+            margin-bottom: 40px !important;
+        }
+        
+        .black-hole {
+            width: 200px !important;
+            height: 200px !important;
+        }
+        
+        .coming-soon-text {
+            font-size: 14px !important;
+            letter-spacing: 4px !important;
+        }
+        
+        .brand-text {
+            font-size: 10px !important;
+            letter-spacing: 2px !important;
+        }
+    }
+`;
+
 const WhatsNew = () => {
     const [glowIntensity, setGlowIntensity] = useState(0);
 
@@ -67,19 +117,20 @@ const WhatsNew = () => {
 
     return (
         <>
+            <style>{mobileStyles}</style>
             <Navbar />
             <div style={styles.container}>
                 {/* Black hole and glow effect */}
-                <div style={styles.blackHoleContainer}>
-                    <div style={blackHoleStyle} />
+                <div style={styles.blackHoleContainer} className="black-hole-container">
+                    <div style={blackHoleStyle} className="black-hole" />
                 </div>
 
                 {/* Text overlay */}
                 <div style={styles.textOverlay}>
-                    <div style={styles.comingSoonText}>
+                    <div style={styles.comingSoonText} className="coming-soon-text">
                         C&nbsp;O&nbsp;M&nbsp;I&nbsp;N&nbsp;G&nbsp;&nbsp;S&nbsp;O&nbsp;O&nbsp;N
                     </div>
-                    <div style={styles.brandText}>
+                    <div style={styles.brandText} className="brand-text">
                         Y O U C O N N E C T
                     </div>
                 </div>

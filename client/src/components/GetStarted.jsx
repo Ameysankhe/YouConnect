@@ -8,8 +8,8 @@ import Footer from './Footer'
 const GetStarted = () => {
   return (
     <>
+      <Navbar />
       <div className='getstarted-container'>
-        <Navbar />
         <RegistrationForm />
         <LoginForm />
       </div>

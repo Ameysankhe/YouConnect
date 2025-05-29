@@ -6,6 +6,8 @@
   font-family: "Arial", sans-serif;
   position: relative;
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 .quicktube-banner h4 {
@@ -13,6 +15,8 @@
   font-weight: 500;
   font-size: 4.5rem;
   margin: 0;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
 .quicktube-banner .hashtag {
@@ -25,4 +29,50 @@
   color: #a3a3a3;
   margin-top: 30px;
   margin-bottom: 50px;
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .quicktube-banner {
+    padding: 30px 15px;
+  }
+  
+  .quicktube-banner h4 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+  
+  .quicktube-banner p {
+    font-size: 16px;
+    margin-top: 20px;
+    margin-bottom: 30px;
+  }
+}
+
+/* Small mobile styles */
+@media (max-width: 480px) {
+  .quicktube-banner h4 {
+    font-size: 3rem;
+  }
+  
+  .quicktube-banner p {
+    font-size: 14px;
+  }
+}
+
+/* Tablet styles */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .quicktube-banner {
+    padding: 40px 20px;
+  }
+  
+  .quicktube-banner h4 {
+    font-size: 3.5rem;
+  }
+  
+  .quicktube-banner p {
+    font-size: 18px;
+  }
 }

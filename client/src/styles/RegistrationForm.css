@@ -6,7 +6,7 @@
     border: 1px solid #ccc; 
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
     font-family: 'Gilroy', sans-serif;
-    margin-top: 150px;
+    margin-top: 100px;
     margin-bottom: 50px;
 }
 
@@ -76,6 +76,37 @@
     background-color: #5050ff;
 }
 
-
-
-
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+    .registration-form {
+        width: 90%;
+        max-width: 380px;
+        margin: 20px auto;
+        padding: 30px 20px;
+    }
+    
+    .registration-form h4 {
+        font-size: 28px;
+        margin-bottom: 15px;
+    }
+    
+    .registration-form .input-box {
+        margin: 18px 0;
+        height: 45px;
+    }
+    
+    .input-box input {
+        font-size: 14px;
+    }
+    
+    .dropdown-menu-registration {
+        font-size: 14px;
+        padding: 10px;
+    }
+    
+    .submit-button-registration {
+        font-size: 14px;
+        padding: 10px;
+        margin-top: 10px;
+    }
+}

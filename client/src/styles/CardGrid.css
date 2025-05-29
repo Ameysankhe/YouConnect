@@ -44,4 +44,70 @@
     font-size: 0.9rem;
     color: #bbb;
   }
+
+  /* Mobile-only changes */
+@media (max-width: 768px) {
+    .card {
+        padding: 25px 20px;
+        margin-bottom: 30px; /* Reduced from 100px */
+        max-width: 350px;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .card:hover {
+        transform: translateY(-3px); /* Reduced hover effect for mobile */
+    }
+    
+    .icon-container {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 12px;
+    }
+    
+    .icon {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .title {
+        font-size: 1.1rem;
+        margin: 8px 0;
+    }
+    
+    .description {
+        font-size: 0.85rem;
+        line-height: 1.4;
+        padding: 0 5px;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .card {
+        padding: 20px 15px;
+        margin-bottom: 20px;
+        max-width: 300px;
+    }
+    
+    .icon-container {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .icon {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .title {
+        font-size: 1rem;
+        margin: 6px 0;
+    }
+    
+    .description {
+        font-size: 0.8rem;
+    }
+}
   

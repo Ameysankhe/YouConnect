@@ -46,3 +46,31 @@
    background-color: #5050ff;
 }
 
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+   .login-form {
+      width: 90%;
+      max-width: 380px;
+      margin: 20px auto;
+      padding: 30px 20px;
+   }
+   
+   .login-form h4 {
+      font-size: 28px;
+      margin-bottom: 15px;
+   }
+   
+   .login-form .input-box {
+      margin: 15px 0;
+      height: 45px;
+   }
+   
+   .input-box input {
+      font-size: 14px;
+   }
+   
+   .submit-button-login {
+      font-size: 14px;
+      padding: 10px;
+   }
+}
